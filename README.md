@@ -23,7 +23,7 @@ npm test             # headless smoke test across every persona, tab and report
   - `tab`: `home`, `explore`, `actions`, `reports`, or `crm`
   - `report`: `map`, `flow`, or any `id` in `src/data/reports.js`
   - `compare=off`: simulates an org that hides other LOs' lender data
-- **Customize Home:** use the Customize Home button to turn widgets on or off. Each persona starts with its own defaults in `HOME_DEFAULTS`. The LO movement widget opens the movement report.
+- **Customize Home:** the Customize button in the header (Home page only) turns widgets on or off. Each persona starts with its own defaults in `HOME_DEFAULTS`. The LO movement widget opens the movement report.
 - **Pipeline board:** drag a card to another stage, or open a card and use its move buttons. You can also switch to List or Activity, filter by priority or owner, or add a deal or recruit.
   - `index.html?persona=rec&tab=crm` opens the recruiter's board.
 - **Genie:** the lamp button at the bottom right opens Genie. On a report, a bubble offers "I can summarize this for you!" with a Summarize button and a bell. Summarize opens the briefing in Genie. The bell (hover: "Turn off Summary Notifications") stops the bubble everywhere, and the Summary notifications switch in the Genie panel turns it back on. Briefings live only in Genie; each report shows a report panel beside its chart instead.
