@@ -48,7 +48,7 @@ npm test             # headless smoke test across every persona, tab and report
 | `src/data/pipeline.js` | **Sample data:** pipeline deals and recruits per persona, stages, team, and Home widget defaults |
 | `src/ui/styles.css` | Base styles plus the InGenius design-system component classes |
 | `src/ui/style-tokens.js` | Shared inline style tokens (navy `#24285D`, orange `#F89624`, fonts) |
-| `public/data/ig-geo.js` | Pre-projected SVG boundaries: US states, all counties, TX and AZ census tracts |
+| `assets/data/ig-geo.js` | Pre-projected SVG boundaries: US states, all counties, TX and AZ census tracts |
 | `tools/build-geo.py` | Rebuilds `ig-geo.js` from the source boundary files |
 | `tests/smoke.test.js` | Node smoke test with no dependencies |
 
@@ -80,3 +80,7 @@ The template and component pattern maps directly onto React or Vue:
 - `renderVals()` is the render function.
 
 The design tokens come from the InGenius design system: navy `#24285D`, orange `#F89624` (never used as text on white), Montserrat for headings, and IBM Plex Sans for text.
+
+## Deploy
+
+There is no build step. Any static host serves the repo root as is. On Vercel, import the repo with the "Other" preset and leave the build command and output directory empty. Static files live in `assets/`, not `public/`, because Vercel would serve only a `public/` folder and skip `index.html`.

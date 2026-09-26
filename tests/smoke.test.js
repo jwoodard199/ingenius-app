@@ -6,7 +6,7 @@ const root = path.join(__dirname, '..');
 global.window = global;
 class DCLogic { constructor(p) { this.props = p; this.state = {}; } setState(o) { Object.assign(this.state, o); } }
 global.DCLogic = DCLogic;
-const files = ['public/data/ig-geo.js', 'src/data/personas.js', 'src/ui/style-tokens.js', 'src/data/generators.js', 'src/data/reports.js', 'src/lib/table.js', 'src/lib/map.js', 'src/lib/flow.js', 'src/lib/sankey.js', 'src/data/pipeline.js', 'src/app.js'];
+const files = ['assets/data/ig-geo.js', 'src/data/personas.js', 'src/ui/style-tokens.js', 'src/data/generators.js', 'src/data/reports.js', 'src/lib/table.js', 'src/lib/map.js', 'src/lib/flow.js', 'src/lib/sankey.js', 'src/data/pipeline.js', 'src/app.js'];
 const src = files.map(f => fs.readFileSync(path.join(root, f), 'utf8')).join('\n') + '\n;global.Component = Component;';
 new Function(src)();
 let checks = 0;
