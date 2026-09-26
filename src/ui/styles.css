@@ -1,0 +1,38 @@
+/* Base page styles plus the InGenius design-system component classes (ig-btn, ig-tag, ...). */
+html, body { height: 100%; }
+body { margin: 0; background: #EEF0F6; color: #24285D; }
+#app { height: 100%; }
+button:focus-visible, input:focus-visible { outline: 2px solid #24285D; outline-offset: 2px; }
+
+.ig-btn{font-family:var(--font-display);font-weight:600;font-size:14px;line-height:20px;letter-spacing:.01em;padding:var(--space-3) 20px;border-radius:var(--radius-md);border:1px solid transparent;cursor:pointer;display:inline-flex;align-items:center;gap:var(--space-2)}
+.ig-btn:focus-visible{outline:2px solid var(--action);outline-offset:2px}
+.ig-btn-primary{background:var(--action);color:var(--on-action)}
+.ig-btn-primary:hover{filter:brightness(1.12)}
+.ig-btn-accent{background:var(--ingenius-orange);color:var(--ingenius-blue-primary)}
+.ig-btn-accent:hover{filter:brightness(1.05)}
+.ig-btn-secondary{background:transparent;color:var(--ink);border-color:var(--line-strong)}
+.ig-btn-secondary:hover{background:var(--surface-alt)}
+.ig-btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+
+.ig-tag{display:inline-flex;align-items:center;gap:var(--space-1);font-family:var(--font-sans);font-size:12px;line-height:16px;font-weight:600;padding:2px var(--space-2);border-radius:var(--radius-sm);border:1px solid var(--line)}
+.ig-tag-neutral{background:var(--surface-alt);color:var(--ink)}
+.ig-tag-accent{background:var(--ingenius-orange);color:var(--ingenius-blue-primary);border-color:transparent}
+.ig-tag-success{background:var(--surface);color:var(--success);border-color:var(--success)}
+.ig-tag-danger{background:var(--surface);color:var(--danger);border-color:var(--danger)}
+
+.ig-stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-md);padding:var(--space-4) var(--space-6);display:flex;flex-direction:column;gap:var(--space-1);min-width:0}
+.ig-stat-label{font-family:var(--font-display);font-size:12px;line-height:16px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-muted)}
+.ig-stat-value{font-family:var(--font-sans);font-size:32px;line-height:36px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.ig-stat-delta{font-family:var(--font-sans);font-size:14px;line-height:20px;font-weight:500}
+.ig-stat-delta.up{color:var(--success)}
+.ig-stat-delta.down{color:var(--danger)}
+.ig-stat-note{font-family:var(--font-sans);font-size:14px;line-height:20px;color:var(--ink-muted)}
+
+.ig-field{display:flex;flex-direction:column;gap:6px;font-family:var(--font-sans)}
+.ig-field label{font-size:14px;line-height:20px;font-weight:600;color:var(--ink)}
+.ig-field input{font:inherit;font-size:16px;line-height:24px;padding:10px var(--space-3);border:1px solid var(--line-strong);border-radius:var(--radius-md);background:var(--surface);color:var(--ink)}
+.ig-field input::placeholder{color:var(--ink-muted)}
+.ig-field input:focus{outline:2px solid var(--action);outline-offset:2px}
+.ig-field .ig-hint{font-size:14px;line-height:20px;color:var(--ink-muted)}
+.ig-field.invalid input{border-color:var(--danger)}
+.ig-field.invalid .ig-hint{color:var(--danger)}
