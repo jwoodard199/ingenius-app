@@ -1063,8 +1063,10 @@ class Component extends DCLogic {
       var on = tab === m.id;
       return { label: compact && m.short ? m.short : m.label, isReports: m.id === 'reports', current: on ? 'page' : 'false', isHome: m.id === 'home', isExplore: m.id === 'explore', isActions: m.id === 'actions', isCrm: m.id === 'crm',
         hasBadge: m.id === 'actions' && remaining > 0,
+        // Phone: the count sits as a small badge on the icon's top right corner.
+        badgeStyle: 'box-sizing: border-box; border-radius: 999px; background: #F89624; color: #24285D; font-weight: 700; text-align: center; ' + (compact ? 'position: absolute; top: 3px; left: calc(50% + 3px); min-width: 17px; height: 17px; padding: 0 4px; font-size: 10px; line-height: 15px; border: 1px solid ' + (on ? '#FFFFFF' : '#24285D') + ';' : 'min-width: 20px; height: 20px; padding: 0 6px; font-size: 11px; line-height: 20px;'),
         go: function () { self.setState({ tab: m.id, aiPop: false }); },
-        style: FONT + 'display: flex; align-items: center; justify-content: center; gap: ' + (compact ? '2px; flex-direction: column; flex: 1 1 0; min-height: 52px; padding: 4px 2px; font-size: 11px; border-radius: 12px;' : '8px; min-height: 44px; padding: 0 16px; font-size: 14px; border-radius: 999px;') + ' border: none; font-weight: 600; cursor: pointer; white-space: nowrap; ' + (on ? 'background: #FFFFFF; color: #24285D;' : 'background: transparent; color: #EEF0F8;') };
+        style: FONT + 'display: flex; align-items: center; justify-content: center; gap: ' + (compact ? '2px; position: relative; flex-direction: column; flex: 1 1 0; min-height: 52px; padding: 4px 2px; font-size: 11px; border-radius: 12px;' : '8px; min-height: 44px; padding: 0 16px; font-size: 14px; border-radius: 999px;') + ' border: none; font-weight: 600; cursor: pointer; white-space: nowrap; ' + (on ? 'background: #FFFFFF; color: #24285D;' : 'background: transparent; color: #EEF0F8;') };
     });
     var titles = { home: 'Home', explore: 'Explore', actions: 'Action items', reports: 'Reports', crm: d.crmTitle };
     var cardR = '16px';
@@ -1086,7 +1088,11 @@ class Component extends DCLogic {
       logoStyle: 'display: block; flex-shrink: 0; ' + (compact ? 'width: 26px; height: 34px;' : 'width: 28px; height: 36px;'),
       pageTitle: titles[tab],
       mainStyle: 'flex-grow: 1; min-height: 0; overflow-y: auto; box-sizing: border-box; ' + (compact ? 'padding: 20px 16px 96px;' : 'padding: 8px 40px 120px;'),
-      gridStyle: 'display: grid; gap: 20px; align-items: start; ' + (compact ? 'grid-template-columns: repeat(1, minmax(0, 1fr));' : 'grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);'),
+      // Desktop: Action items floats right and the other widgets wrap around it, going full width once they pass its bottom.
+      gridStyle: compact ? 'display: grid; gap: 20px; align-items: start; grid-template-columns: repeat(1, minmax(0, 1fr));' : 'display: flow-root;',
+      homeSideStyle: 'display: flex; flex-direction: column; gap: 20px; min-width: 0; ' + (compact ? 'order: 1;' : 'float: right; width: calc((100% - 20px) / 3); margin: 0 0 20px 20px;'),
+      homeMainStyle: 'min-width: 0; ' + (compact ? 'display: flex; flex-direction: column; gap: 20px;' : 'display: block;'),
+      hwBox: 'display: flow-root; min-width: 0; ' + (compact ? '' : 'margin-bottom: 20px;'),
       narrowCol: 'display: flex; flex-direction: column; gap: 20px; ' + (compact ? '' : 'max-width: 880px; margin: 0 auto;'),
       kpiRow: 'display: grid; gap: ' + (compact ? '10px; grid-template-columns: repeat(1, minmax(0, 1fr));' : '20px; grid-template-columns: repeat(3, minmax(0, 1fr));'),
       kpiCard: 'background: #FFFFFF; border: 1px solid #DADCE8; border-radius: ' + cardR + '; padding: ' + (compact ? '14px 16px' : '18px 20px') + '; display: flex; flex-direction: column; gap: 4px;',
