@@ -1082,7 +1082,7 @@ class Component extends DCLogic {
     return Object.assign(this.reportVals(compact), this.pipeVals(compact), this.homeVals(compact), {
       d: dd, compact: compact, wide: !compact,
       rootStyle: VARS + FONT + 'position: relative; overflow: hidden; display: flex; flex-direction: column; background: #EEF0F6; color: #24285D; ' + 'width: 100%; height: 100%;',
-      headerStyle: 'flex-shrink: 0; display: flex; align-items: center; box-sizing: border-box; ' + (compact ? 'gap: 10px; min-height: 56px; padding: 8px 16px; background: #FFFFFF; border-bottom: 1px solid #DADCE8;' : 'gap: 16px; min-height: 64px; padding: 12px 40px;'),
+      headerStyle: 'flex-shrink: 0; display: flex; align-items: center; box-sizing: border-box; ' + (compact ? 'gap: 10px; min-height: 56px; padding: 8px 16px;' : 'gap: 16px; min-height: 64px; padding: 12px 40px; margin-bottom: 16px;') + ' background: #FFFFFF; border-bottom: 1px solid #DADCE8; box-shadow: 0 1px 3px rgba(36,40,93,0.06);',
       logoStyle: 'display: block; flex-shrink: 0; ' + (compact ? 'width: 26px; height: 34px;' : 'width: 28px; height: 36px;'),
       pageTitle: titles[tab],
       mainStyle: 'flex-grow: 1; min-height: 0; overflow-y: auto; box-sizing: border-box; ' + (compact ? 'padding: 20px 16px 96px;' : 'padding: 8px 40px 120px;'),
