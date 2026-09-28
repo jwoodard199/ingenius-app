@@ -55,6 +55,12 @@ for (const persona of ['Loan officer', 'Lender executive', 'Recruiter', 'Account
     v.nudgeGo(); v = c.renderVals(); ok(c.state.aiPop && c.state.aiBrief, 'Summarize opens the briefing in Genie');
     v.aiClose ? v.aiClose() : c.setState({ aiPop: false }); v = c.renderVals(); ok(!v.nudgeShow, 'bubble stays away on a report already summarized');
     v.nudgeOff(); v = c.renderVals(); v.nudgeToggle(); v = c.renderVals(); ok(!c.state.nudgeOff, 'bubble can be turned back on');
+    // Genie: full-screen chat builds a report and saves it to Reports.
+    c.state.aiPop = true; v = c.renderVals();
+    v.aiFullToggle(); v = c.renderVals(); ok(v.aiFull && /z-index: 50/.test(v.aiPopStyle), 'Genie expands to full screen');
+    v.aiSuggest[0].ask(); v = c.renderVals(); ok(v.aiMsgs.length === 1 && v.aiMsgs[0].hasReport, 'Genie builds a report from a question');
+    v.aiMsgs[0].open(); v = c.renderVals(); ok(c.state.tab === 'reports' && v.rep.custom && !c.state.aiFull, 'the Genie report opens in Reports as a custom report');
+    ok(v.rLib.some(function (l) { return /^✦ /.test(l.label); }), 'custom report gets its own report tab');
     c.state.tab = 'crm'; v = c.renderVals();
     const words = JSON.stringify(v.plColumns.map(cl => cl.addLabel)) + v.plAddLabel + v.plCountTag;
     ok(!/task|opportunit/i.test(words), 'deal and recruit wording');

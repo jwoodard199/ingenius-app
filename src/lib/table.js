@@ -13,6 +13,8 @@ function fmtCell(c, v) {
   return String(v);
 }
 function fmtVal(c, v) { return c.t === 'text' ? '“' + v + '”' : fmtCell(c, v).replace(/^[↑↓] /, v < 0 ? '-' : ''); }
+// Words Genie ignores when matching a question to a report.
+var GENIE_STOP = ['the', 'and', 'for', 'with', 'who', 'what', 'which', 'that', 'this', 'are', 'have', 'show', 'all', 'from', 'how', 'many', 'list', 'find', 'give', 'our', 'your', 'you', 'did', 'does', 'any', 'but', 'was', 'were', 'has', 'had', 'can', 'build', 'make', 'report', 'want', 'see', 'get', 'please', 'into', 'about', 'them', 'they', 'most', 'more'];
 function test(row, f) {
   var x = row[f.c];
   if (f.o === 'is' || f.o === 'not') {

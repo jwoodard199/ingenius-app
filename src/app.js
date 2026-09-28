@@ -10,7 +10,7 @@ class Component extends DCLogic {
     if (prev.allowCompare !== this.props.allowCompare) this.setState({ allowCompare: this.props.allowCompare !== false });
   }
   fresh(p, allow) {
-    return { persona: p, allowCompare: allow, tab: 'home', viewId: null, chips: null, banner: null, roadUndone: false, aiPop: false, modal: null, thread: [], done: {}, acted: {}, expanded: 0, fsel: {}, log: [], hover: null, reportId: null, rFilters: [], rSort: { col: null, dir: 'asc' }, rSearch: '', rAdd: false, rEdit: null, rHoverBin: null, rBanner: null, mapSt: undefined, mapCo: undefined, mapMetric: null, mapHover: null, mapSel: null, mapShow: 'all', mapPop: null, mapNote: null, briefHow: false, aiBrief: false, flowMeasure: null, flowPeriod: null, flowFocus: null, flowHover: null, flowPop: null, flowDir: 'going', flowCohort: 'a', plView: 'board', plPri: {}, plOwn: {}, plStuck: false, plQ: '', plPop: null, plSel: null, plMoves: {}, plAdded: [], plAdd: null, plDraft: '', plColSort: {}, plBanner: null, loSearch: '', loSort: { col: null, dir: 'asc' }, homeW: null, homeEdit: false, nudgeOff: false, nudgeHidden: {}, nudgeTip: false };
+    return { persona: p, allowCompare: allow, tab: 'home', viewId: null, chips: null, banner: null, roadUndone: false, aiPop: false, modal: null, thread: [], done: {}, acted: {}, expanded: 0, fsel: {}, log: [], hover: null, reportId: null, rFilters: [], rSort: { col: null, dir: 'asc' }, rSearch: '', rAdd: false, rEdit: null, rHoverBin: null, rBanner: null, mapSt: undefined, mapCo: undefined, mapMetric: null, mapHover: null, mapSel: null, mapShow: 'all', mapPop: null, mapNote: null, briefHow: false, aiBrief: false, flowMeasure: null, flowPeriod: null, flowFocus: null, flowHover: null, flowPop: null, flowDir: 'going', flowCohort: 'a', plView: 'board', plPri: {}, plOwn: {}, plStuck: false, plQ: '', plPop: null, plSel: null, plMoves: {}, plAdded: [], plAdd: null, plDraft: '', plColSort: {}, plBanner: null, loSearch: '', loSort: { col: null, dir: 'asc' }, homeW: null, homeEdit: false, nudgeOff: false, nudgeHidden: {}, nudgeTip: false, aiFull: false, aiDraft: '', myReports: [] };
   }
   data() { return PERSONAS[this.state.persona]; }
   prompts() {
@@ -35,6 +35,59 @@ class Component extends DCLogic {
     var p = this.prompts()[i];
     var thread = this.state.thread.concat([{ q: p.q, did: p.did, a: p.a }]);
     this.setState(Object.assign(this.viewState(p.view, true), { thread: thread }));
+  }
+  // Genie chat: match a question to the closest report question, build that report and save it to Reports.
+  genieAsk(text) {
+    var s = this.state, q = String(text || '').trim();
+    if (!q) return;
+    var words = function (t) { return t.toLowerCase().replace(/[^a-z0-9+]/g, ' ').split(/\s+/).filter(function (w) { return w.length > 2 && GENIE_STOP.indexOf(w) < 0; }); };
+    var qw = words(q), best = null, bestScore = 0;
+    var score = function (hayText) { var hay = words(hayText); return qw.filter(function (w) { return hay.some(function (h) { return h.indexOf(w) === 0 || w.indexOf(h) === 0; }); }).length; };
+    REPORTS[s.persona].forEach(function (r) {
+      if (!r.cols) return;
+      var sr = score(r.label + ' ' + r.desc);
+      if (sr > bestScore) { bestScore = sr; best = { rep: r, a: null }; }
+      (r.ai || []).forEach(function (a) { var sa = score(a.q + ' ' + r.label); if (sa >= bestScore && sa > 0) { bestScore = sa; best = { rep: r, a: a }; } });
+    });
+    if (!best) best = { rep: REPORTS[s.persona].filter(function (r) { return r.cols; })[0], a: null };
+    var r = best.rep, f = (best.a ? best.a.f : []).slice(), extra = [], sort = null, lq = q.toLowerCase();
+    // A place or name from the data in the question becomes a filter; "top" sorts by the report's main measure.
+    r.cols.forEach(function (c) {
+      if (c.t !== 'text' || f.some(function (x) { return x.c === c.k; })) return;
+      var seen = {};
+      r.data.forEach(function (row) { var v = String(row[c.k]); if (v.length > 2 && !seen[v] && lq.indexOf(v.toLowerCase()) >= 0) seen[v] = true; });
+      var vals = Object.keys(seen);
+      if (vals.length) { f.push({ c: c.k, o: 'is', v: vals }); extra.push('Filtered ' + c.l.toLowerCase() + ' to ' + vals.join(', ')); }
+    });
+    if (/\b(top|best|biggest|largest|most)\b/.test(lq)) {
+      var bc = r.cols.filter(function (c) { return c.bar; })[0] || r.cols[1];
+      sort = { col: bc.k, dir: 'desc' }; extra.push('Sorted by ' + bc.l.toLowerCase() + ', highest first');
+    }
+    var rows = r.data.filter(function (row) { return f.every(function (x) { return test(row, x); }); });
+    var mine = s.myReports || [], id = 'genie' + (mine.length + 1);
+    var label = q.length > 34 ? q.slice(0, 32).replace(/\s+\S*$/, '') + '…' : q;
+    label = label.charAt(0).toUpperCase() + label.slice(1);
+    var noun = RCFG[r.id].noun.toLowerCase();
+    var did = (best.a ? best.a.did : extra.length ? [] : ['Started from ' + r.label + ', with every row']).concat(extra).concat(['Saved it to Reports as “' + label + '”']);
+    var a = rows.length ? 'I found ' + rows.length + ' ' + noun + ' in ' + r.label + ' that match. It’s saved in Reports, where you can filter, sort or export it.' : 'Nothing in ' + r.label + ' matches yet. I saved the report anyway, so you can loosen the filters in Reports.';
+    this.setState({ myReports: mine.concat([{ id: id, label: label, base: r.id, f: f, q: q, sort: sort }]), thread: s.thread.concat([{ q: q, did: did, a: a, reportId: id, reportLabel: label }]), aiDraft: '', aiBrief: false });
+    // Keep the newest answer in view.
+    if (typeof document !== 'undefined') setTimeout(function () { var el = document.querySelector('[role="dialog"][aria-label="Ask Genie"]'); if (el) el.scrollTop = el.scrollHeight; }, 60);
+  }
+  openMyReport(id) {
+    var m = (this.state.myReports || []).filter(function (r) { return r.id === id; })[0];
+    if (!m) return;
+    this.setState({ tab: 'reports', reportId: id, rFilters: m.f.map(function (x) { return Object.assign({}, x); }), rSort: m.sort || { col: null, dir: 'asc' }, rSearch: '', rAdd: false, rEdit: null, rBanner: null, rHoverBin: null, aiPop: false, aiFull: false });
+    // Bring the new report's tab into view (the tab row scrolls on small screens).
+    if (typeof document !== 'undefined') setTimeout(function () { var t = document.querySelector('[role="tablist"][aria-label="Reports"] [aria-selected="true"]'); if (t && t.scrollIntoView) t.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }, 60);
+  }
+  // Report tabs: the persona's reports, then any report Genie built.
+  reportLib() {
+    var s = this.state, base = REPORTS[s.persona];
+    return base.concat((s.myReports || []).map(function (m) {
+      var b = base.filter(function (r) { return r.id === m.base; })[0];
+      return Object.assign({}, b, { id: m.id, label: m.label, base: m.base, custom: true, desc: 'Built by Genie from “' + m.q + '”' });
+    }));
   }
   addLog(text) { return [{ text: text, when: 'Just now' }].concat(this.state.log); }
   gridParts(cols, data, allData, hidden, sortKey) {
@@ -764,10 +817,10 @@ class Component extends DCLogic {
   }
   reportVals(compact) {
     var self = this, s = this.state;
-    var lib = REPORTS[s.persona];
+    var lib = this.reportLib();
     var rep = lib[0];
     lib.forEach(function (r) { if (r.id === s.reportId) rep = r; });
-    var cfg = RCFG[rep.id];
+    var cfg = RCFG[rep.base || rep.id];
     var tabs = {
       isReports: s.tab === 'reports',
       rep: rep,
@@ -775,9 +828,9 @@ class Component extends DCLogic {
       rTabsStyle: 'display: flex; gap: 2px; padding: 3px; background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 10px; box-sizing: border-box; min-width: 0; overflow-x: auto; ' + (compact ? 'width: 100%;' : 'flex-shrink: 0;'),
       rLib: lib.map(function (r) {
         var on = r.id === rep.id;
-        return { label: compact ? RCFG[r.id].short : r.label, pressed: on ? 'true' : 'false',
+        return { label: r.custom ? '✦ ' + r.label : compact ? RCFG[r.id].short : r.label, pressed: on ? 'true' : 'false',
           style: FONT + 'height: 32px; padding: 0 12px; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; ' + (on ? 'background: #24285D; color: #FFFFFF;' : 'background: transparent; color: #474945;'),
-          pick: function () { self.setState({ reportId: r.id, rFilters: [], rSort: { col: null, dir: 'asc' }, rAdd: false, rEdit: null, rBanner: null, rHoverBin: null }); } };
+          pick: function () { if (r.custom) { self.openMyReport(r.id); return; } self.setState({ reportId: r.id, rFilters: [], rSort: { col: null, dir: 'asc' }, rAdd: false, rEdit: null, rBanner: null, rHoverBin: null }); } };
       }),
       rNew: function () { self.setState({ aiPop: true }); },
       rNewStyle: FONT + 'height: 38px; display: flex; align-items: center; gap: 6px; padding: 0 12px; border: 1px dashed #8286A8; border-radius: 10px; background: transparent; color: #24285D; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;'
@@ -1129,12 +1182,29 @@ class Component extends DCLogic {
       aiBtnStyle: 'position: absolute; z-index: 31; display: flex; align-items: center; justify-content: center; padding: 0; border: 2px solid #FFFFFF; border-radius: 999px; cursor: pointer; background: #F89624; color: #24285D; box-shadow: 0 2px 4px rgba(21,24,58,0.20), 0 12px 28px rgba(21,24,58,0.28); ' + (compact ? 'right: 8px; bottom: 8px; width: 64px; height: 64px;' : 'right: 40px; bottom: 22px; width: 64px; height: 64px;') + (s.aiPop ? ' outline: 3px solid #24285D; outline-offset: 2px;' : ''),
       lampSize: '32',
       toggleAi: function () { self.setState({ aiPop: !s.aiPop }); },
-      closeAi: function () { self.setState({ aiPop: false }); },
+      closeAi: function () { self.setState({ aiPop: false, aiFull: false }); },
       aiPopOpen: s.aiPop,
-      aiPopStyle: 'position: absolute; z-index: 28; ' + (compact ? 'left: 8px; right: 8px; bottom: 84px; max-height: 700px; overflow-y: auto;' : 'right: 40px; bottom: 100px; width: 760px; max-width: calc(100% - 80px); max-height: calc(100% - 200px); overflow-y: auto;') + ' border-radius: 16px; box-shadow: 0 8px 32px rgba(36,40,93,0.18);',
-      aiIdle: s.thread.length === 0 && !(s.aiBrief && tab === 'reports'), aiHasThread: s.thread.length > 0 && !(s.aiBrief && tab === 'reports'), aiLast: aiLast,
+      aiPopStyle: s.aiFull
+        ? 'position: absolute; z-index: 50; top: 0; left: 0; right: 0; bottom: 0; overflow-y: auto; box-sizing: border-box; background: #F4F5F9; display: flex; justify-content: center; ' + (compact ? 'padding: 0;' : 'padding: 24px 40px;')
+        // Pop-up modal, centered over a dimmed page; the expand button makes it full screen.
+        : 'position: absolute; z-index: 45; overflow-y: auto; border-radius: 16px; box-shadow: 0 24px 64px rgba(21,24,58,0.35); ' + (compact ? 'left: 12px; right: 12px; top: 48px; max-height: calc(100% - 96px);' : 'left: 50%; top: 50%; transform: translate(-50%, -50%); width: 820px; max-width: calc(100% - 80px); max-height: calc(100% - 96px);'),
+      aiSectionStyle: s.aiFull
+        ? 'width: 100%; max-width: 880px; min-height: 100%; display: flex; flex-direction: column; gap: 16px; box-sizing: border-box; background: transparent; ' + (compact ? 'padding: 16px;' : 'padding: 8px 0;')
+        : 'background: #F4F5F9; border: 1px solid #DADCE8; border-radius: ' + cardR + '; display: flex; flex-direction: column; gap: 14px; box-sizing: border-box; ' + (compact ? 'padding: 16px;' : 'padding: 20px;'),
+      aiFull: !!s.aiFull, aiNotFull: !s.aiFull, aiFullLabel: s.aiFull ? 'Exit full screen' : 'Expand Genie to full screen',
+      aiFullToggle: function () { self.setState({ aiFull: !s.aiFull }); },
+      aiNotifText: !compact,
+      aiInputStyle: 'display: flex; align-items: center; gap: 8px; height: 50px; padding: 0 6px 0 16px; border: 1px solid #8286A8; border-radius: 999px; background: #FFFFFF; box-sizing: border-box; flex-shrink: 0; ' + (s.aiFull ? 'position: sticky; bottom: ' + (compact ? '12px' : '0') + '; margin-top: auto; box-shadow: 0 6px 24px rgba(36,40,93,0.16);' : ''),
+      aiDraft: s.aiDraft || '',
+      aiOnDraft: function (e) { self.setState({ aiDraft: e && e.target ? e.target.value : '' }); },
+      aiOnKey: function (e) { if (e && e.key === 'Enter') { if (e.preventDefault) e.preventDefault(); self.genieAsk(self.state.aiDraft); } },
+      aiSend: function () { self.genieAsk(self.state.aiDraft); },
+      aiSuggest: [].concat.apply([], REPORTS[s.persona].filter(function (r) { return r.cols && r.ai; }).map(function (r) { return r.ai.slice(0, 1); })).slice(0, 3).map(function (a) {
+        return { label: a.q, ask: function () { self.genieAsk(a.q); } }; }),
+      aiMsgs: s.thread.map(function (m) { return { q: m.q, did: m.did, a: m.a, hasReport: !!m.reportId, noReport: !m.reportId, reportLabel: m.reportLabel || '', open: function () { self.openMyReport(m.reportId); } }; }),
+      aiIdle: s.thread.length === 0 && !(s.aiBrief && tab === 'reports'), aiNotBriefing: !(s.aiBrief && tab === 'reports'), aiHasThread: s.thread.length > 0 && !(s.aiBrief && tab === 'reports'), aiLast: aiLast,
       briefHowOpen: !!s.briefHow, briefToggleHow: function () { self.setState({ briefHow: !s.briefHow }); },
-      nudgeShow: tab === 'reports' && !s.aiPop && !s.nudgeOff && !s.nudgeHidden[s.reportId || '_first'],
+      nudgeShow: tab === 'reports' && !s.aiPop && !s.nudgeOff && !s.nudgeHidden[s.reportId || '_first'] && String(s.reportId).indexOf('genie') !== 0,
       nudgeSub: 'Genie can brief you on ' + ((REPORTS[s.persona].filter(function (r) { return r.id === s.reportId; })[0] || REPORTS[s.persona][0]).label || 'this report') + ' and check the numbers.',
       nudgeGo: function () { var h = Object.assign({}, s.nudgeHidden); h[s.reportId || '_first'] = true; self.setState({ aiPop: true, aiBrief: true, nudgeHidden: h }); },
       nudgeHide: function () { var h = Object.assign({}, s.nudgeHidden); h[s.reportId || '_first'] = true; self.setState({ nudgeHidden: h }); },
