@@ -6,7 +6,7 @@ const root = path.join(__dirname, '..');
 global.window = global;
 class DCLogic { constructor(p) { this.props = p; this.state = {}; } setState(o) { Object.assign(this.state, o); } }
 global.DCLogic = DCLogic;
-const files = ['assets/data/ig-geo.js', 'src/data/personas.js', 'src/ui/style-tokens.js', 'src/data/generators.js', 'src/data/reports.js', 'src/lib/table.js', 'src/lib/map.js', 'src/lib/flow.js', 'src/lib/sankey.js', 'src/data/pipeline.js', 'src/app.js'];
+const files = ['assets/data/ig-geo.js', 'src/data/personas.js', 'src/ui/style-tokens.js', 'src/data/generators.js', 'src/data/reports.js', 'src/lib/table.js', 'src/lib/map.js', 'src/lib/flow.js', 'src/lib/sankey.js', 'src/data/pipeline.js', 'src/data/directory.js', 'src/lib/search.js', 'src/app.js'];
 const src = files.map(f => fs.readFileSync(path.join(root, f), 'utf8')).join('\n') + '\n;global.Component = Component;';
 new Function(src)();
 let checks = 0;
@@ -64,6 +64,38 @@ for (const persona of ['Loan officer', 'Lender executive', 'Recruiter', 'Account
     c.state.tab = 'crm'; v = c.renderVals();
     const words = JSON.stringify(v.plColumns.map(cl => cl.addLabel)) + v.plAddLabel + v.plCountTag;
     ok(!/task|opportunit/i.test(words), 'deal and recruit wording');
+    // Global search: categorized quick results, the one-category toggle, and the advanced page.
+    c.state.tab = 'home'; v = c.renderVals();
+    ok(compact ? v.srShowIcon : v.srShowBox, persona + ' header has search');
+    if (compact) { v.srOpenIcon(); v = c.renderVals(); ok(v.srShowBox && v.srPanelOpen, 'phone search opens full screen'); }
+    v.srOnInput({ target: { value: 'a' } }); v = c.renderVals();
+    ok(v.srPanelOpen && v.srGroups.length === 6, persona + ' quick search returns all six categories');
+    ok(v.srGroups.every(g => g.rows.length <= 3), 'quick search shows at most 3 per category');
+    ok(v.srGroups.some(g => g.total > g.rows.length), 'quick search reports totals beyond what it shows');
+    v.srOnKey({ key: 'ArrowDown', preventDefault() {} }); v = c.renderVals(); ok(v.srActive, 'arrow keys move through results');
+    v.srChips[3].pick(); v = c.renderVals();
+    ok(v.srGroups.length === 1 && v.srGroups[0].label === 'Real estate agents' && v.srGroups[0].rows.length <= 6 && v.srHasOnly, 'toggle searches one category');
+    v.srOnlyClear(); v = c.renderVals(); ok(v.srGroups.length === 6, 'toggle back to all categories');
+    v.srGroups[5].seeAll(); v = c.renderVals();
+    ok(v.isSearch && c.state.srCat === 'property' && v.srRows.length > 0 && v.srTabs.length === 6, 'See all opens advanced search for that category');
+    ok(v.pageTitle === 'Search' && !v.srPanelOpen, 'advanced page replaces the dropdown');
+    for (const tb of v.srTabs) {
+      tb.pick(); v = c.renderVals();
+      ok(v.srPills.length >= 3, persona + ' ' + tb.label + ' has its own filters');
+      const n0 = v.srRows.length + (v.srMore ? 1 : 0);
+      v.srGenieRun(); v = c.renderVals(); ok(v.srHasBanner && v.srPills.some(p => p.ai), tb.label + ' Genie filter');
+      v.srUndo(); v = c.renderVals(); ok(!v.srHasFilters, 'Genie filter undo');
+      const fp = v.srPills.find(p => !p.locked); fp.toggle(); v = c.renderVals(); ok(v.srPopOpen && v.srPopOpts.length > 0, 'filter popover');
+      v.srPopOpts[v.srPopOpts.length > 1 ? 1 : 0].pick(); v = c.renderVals(); ok(v.srHasFilters, tb.label + ' filter applies');
+      v.srResetF(); v = c.renderVals();
+      v.srSortToggle(); v = c.renderVals(); v.srSorts[1].pick(); v = c.renderVals(); ok(!v.srSortPop, 'sort applies');
+      if (v.srRows[0]) { v.srRows[0].toggle(); v = c.renderVals(); ok(v.srRows[0].open && v.srRows[0].detail.length > 0, 'row expands to details'); v.srRows[0].act(); v = c.renderVals(); ok(v.srRows[0].actDone, 'row action syncs to CRM'); }
+      if (v.srRows[0] && v.srRows[0].hasLinks) { v.srRows[0].links[0].go(); v = c.renderVals(); ok(v.isSearch && v.srRows.length > 0, tb.label + ' links to the related company or people'); }
+      c.state.srQ = 'a'; v = c.renderVals();
+    }
+    if (persona === 'Loan officer') { c.state.allowCompare = false; c.state.srCat = 'lo'; v = c.renderVals(); ok(v.srGated && v.srRows[0].cells[0].text === 'Hidden' && v.srPills.find(p => p.label === 'Units').locked, 'org permission hides LO production in search'); c.state.allowCompare = true; }
+    v.srOnInput({ target: { value: 'zzqx' } }); v = c.renderVals(); ok(v.srNoRows, 'advanced search empty state');
+    c.state.tab = 'home'; v = c.renderVals(); v.srOnInput({ target: { value: 'zzqx' } }); v = c.renderVals(); ok(v.srNoHits, 'quick search empty state');
   }
 }
 console.log('ok: ' + checks + ' checks passed');

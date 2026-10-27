@@ -18,12 +18,109 @@
     <span role="img" aria-label="InGenius" style="{{logoStyle}}"><svg viewBox="53 -2 52 68" width="100%" height="100%" aria-hidden="true" style="display: block;"><defs><linearGradient id="igBulbGrad" x1="79" y1="0" x2="101" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#F7C42A"></stop><stop offset="1" stop-color="#F89522"></stop></linearGradient><clipPath id="igBulbClip"><path d="M67 58.5V51C67 45 57 38.5 57 25.5A22 22 0 0 1 101 25.5C101 38.5 91 45 91 51V58.5Z"></path></clipPath></defs><path d="M67 58.5V51C67 45 57 38.5 57 25.5A22 22 0 0 1 101 25.5C101 38.5 91 45 91 51V58.5Z" fill="#FFFFFF"></path><rect x="79.5" y="0" width="24" height="60" fill="url(#igBulbGrad)" clip-path="url(#igBulbClip)"></rect><path d="M67 58.5V51C67 45 57 38.5 57 25.5A22 22 0 0 1 101 25.5C101 38.5 91 45 91 51V58.5Z" fill="none" stroke="#24285D" stroke-width="4" stroke-linejoin="round"></path><path d="M65 57.5H93V60.5A3 3 0 0 1 90 63.5H68A3 3 0 0 1 65 60.5Z" fill="#24285D"></path></svg></span>
     <sc-if value="{{wide}}" hint-placeholder-val="{{true}}">
       <div style="width: 1px; height: 28px; background: #DADCE8;"></div>
-      <div style="display: flex; flex-direction: column;">
-        <span style="font-family: Montserrat, sans-serif; font-size: 18px; line-height: 24px; font-weight: 700;">{{pageTitle}}</span>
-        <span style="font-size: 13px; line-height: 18px; color: #474945;">{{d.role}} · Thursday, September 25</span>
+      <div style="display: flex; flex-direction: column; min-width: 0; flex-shrink: 1; white-space: nowrap;">
+        <span style="font-family: Montserrat, sans-serif; font-size: 18px; line-height: 24px; font-weight: 700; overflow: hidden; text-overflow: ellipsis;">{{pageTitle}}</span>
+        <span style="font-size: 13px; line-height: 18px; color: #474945; overflow: hidden; text-overflow: ellipsis;">{{d.role}} · Thursday, September 25</span>
       </div>
     </sc-if>
-    <div style="flex-grow: 1;"></div>
+    <sc-if value="{{srShowIcon}}" hint-placeholder-val="{{false}}">
+      <button type="button" onClick="{{srOpenIcon}}" aria-label="Search" title="Search" style="width: 40px; height: 40px; flex-shrink: 0; border-radius: 999px; border: 1px solid #DADCE8; background: #FFFFFF; color: #24285D; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+      </button>
+    </sc-if>
+    <sc-if value="{{srShowBox}}" hint-placeholder-val="{{true}}">
+      <div style="{{srWrapStyle}}">
+        <div style="{{srBarStyle}}">
+          <sc-if value="{{srBack}}" hint-placeholder-val="{{false}}">
+            <button type="button" onClick="{{srClose}}" aria-label="Close search" style="width: 40px; height: 40px; flex-shrink: 0; border: none; border-radius: 999px; background: transparent; color: #24285D; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>
+            </button>
+          </sc-if>
+          <label style="{{srBoxStyle}}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex-shrink: 0; color: #474945;"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+            <input id="ig-search" type="text" role="combobox" autocomplete="off" aria-label="Search" aria-autocomplete="list" aria-controls="ig-search-list" aria-expanded="{{srExpanded}}" aria-activedescendant="{{srActive}}" placeholder="{{srPlaceholder}}" value="{{srQ}}" onInput="{{srOnInput}}" onKeyDown="{{srOnKey}}" onClick="{{srOnClick}}" style="flex: 1 1 auto; min-width: 0; height: 100%; border: none; outline: none; background: transparent; color: #24285D; font-family: inherit; font-size: 14px; padding: 0;">
+            <sc-if value="{{srHasOnly}}" hint-placeholder-val="{{false}}">
+              <span style="flex-shrink: 0; height: 28px; display: flex; align-items: center; gap: 4px; padding: 0 4px 0 10px; border-radius: 999px; background: #24285D; color: #FFFFFF; font-size: 12px; font-weight: 600; white-space: nowrap;">
+                {{srOnlyLabel}}
+                <button type="button" onClick="{{srOnlyClear}}" aria-label="Search all categories" style="width: 20px; height: 20px; border: none; border-radius: 999px; background: transparent; color: #FFFFFF; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+                </button>
+              </span>
+            </sc-if>
+            <sc-if value="{{srHasQ}}" hint-placeholder-val="{{false}}">
+              <button type="button" onClick="{{srClear}}" aria-label="Clear search" style="width: 28px; height: 28px; flex-shrink: 0; border: none; border-radius: 999px; background: transparent; color: #474945; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+              </button>
+            </sc-if>
+          </label>
+        </div>
+        <sc-if value="{{srPanelOpen}}" hint-placeholder-val="{{false}}">
+          <div id="ig-search-list" role="listbox" aria-label="Search results" style="{{srPanelStyle}}">
+            <div role="group" aria-label="Search in" style="{{srChipRow}}">
+              <sc-for list="{{srChips}}" as="ch" hint-placeholder-count="7">
+                <button type="button" onClick="{{ch.pick}}" aria-pressed="{{ch.pressed}}" style="{{ch.style}}">{{ch.label}}</button>
+              </sc-for>
+            </div>
+            <sc-if value="{{srEmptyQ}}" hint-placeholder-val="{{true}}">
+              <sc-if value="{{srHasRecent}}" hint-placeholder-val="{{false}}">
+                <div style="display: flex; flex-direction: column; gap: 2px;">
+                  <span style="font-size: 12px; line-height: 16px; font-weight: 600; color: #474945; text-transform: uppercase; letter-spacing: 0.04em; padding: 0 10px 4px;">Recent searches</span>
+                  <sc-for list="{{srRecent}}" as="rc" hint-placeholder-count="2">
+                    <button type="button" onClick="{{rc.go}}" style="display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px; border: none; border-radius: 8px; background: transparent; color: #24285D; font-family: inherit; font-size: 14px; cursor: pointer; text-align: left;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8286A8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M12 8v4l3 2"></path></svg>{{rc.label}}</button>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <span style="font-size: 13px; line-height: 19px; color: #474945; padding: 0 10px;">{{srHint}}</span>
+            </sc-if>
+            <sc-if value="{{srNoHits}}" hint-placeholder-val="{{false}}">
+              <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 8px 10px;">
+                <span style="font-size: 14px; line-height: 20px; font-weight: 600;">{{srNoHitsText}}</span>
+                <span style="font-size: 13px; line-height: 18px; color: #474945;">Check the spelling, or try a company, ZIP, NMLS ID or street name.</span>
+                <sc-if value="{{srCanWiden}}" hint-placeholder-val="{{false}}">
+                  <button type="button" onClick="{{srWiden}}" style="height: 32px; padding: 0 12px; border: 1px solid #24285D; border-radius: 8px; background: #FFFFFF; color: #24285D; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;">Search all categories</button>
+                </sc-if>
+              </div>
+            </sc-if>
+            <sc-for list="{{srGroups}}" as="g" hint-placeholder-count="3">
+              <div role="group" aria-label="{{g.label}}" style="display: flex; flex-direction: column; gap: 2px;">
+                <div style="display: flex; align-items: center; gap: 8px; padding: 0 10px 2px;">
+                  <span style="font-family: Montserrat, sans-serif; font-size: 13px; line-height: 18px; font-weight: 700;">{{g.label}}</span>
+                  <span style="font-size: 12px; line-height: 16px; color: #474945;">{{g.totalText}}</span>
+                  <span style="flex-grow: 1;"></span>
+                  <sc-if value="{{g.total}}" hint-placeholder-val="{{true}}">
+                    <button type="button" onClick="{{g.seeAll}}" style="height: 26px; display: flex; align-items: center; gap: 4px; padding: 0 6px; border: none; border-radius: 6px; background: transparent; color: #24285D; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;">{{g.seeAllLabel}}
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg></button>
+                  </sc-if>
+                </div>
+                <sc-if value="{{g.empty}}" hint-placeholder-val="{{false}}"><span style="font-size: 13px; color: #474945; padding: 4px 10px;">No matches in this category.</span></sc-if>
+                <sc-for list="{{g.rows}}" as="it" hint-placeholder-count="3">
+                  <button type="button" role="option" id="{{it.id}}" aria-selected="{{it.selected}}" onClick="{{it.open}}" onMouseEnter="{{it.hover}}" style="{{it.style}}">
+                    <sc-if value="{{g.isPerson}}" hint-placeholder-val="{{true}}"><span aria-hidden="true" style="{{g.avatar}}">{{it.initials}}</span></sc-if>
+                    <sc-if value="{{g.isLender}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="{{g.avatar}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18L12 4z"></path><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"></path></svg></span></sc-if>
+                    <sc-if value="{{g.isOffice}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="{{g.avatar}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="1.5"></rect><path d="M9 7h2M13 7h2M9 11h2M13 11h2M10 21v-4h4v4"></path></svg></span></sc-if>
+                    <sc-if value="{{g.isTitle}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="{{g.avatar}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7z"></path><path d="M14 3v4h4M10 14l2 2 3-4"></path></svg></span></sc-if>
+                    <sc-if value="{{g.isProperty}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="{{g.avatar}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 4l8 7"></path><path d="M6 10v10h12V10"></path><path d="M10 20v-5h4v5"></path></svg></span></sc-if>
+                    <span style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column;">
+                      <span style="font-size: 14px; line-height: 20px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{it.name}}</span>
+                      <span style="font-size: 12px; line-height: 17px; color: #474945; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{it.sub}}</span>
+                    </span>
+                    <sc-if value="{{wide}}" hint-placeholder-val="{{true}}"><span style="flex-shrink: 0; font-size: 12px; line-height: 17px; color: #474945; text-align: right; white-space: nowrap;">{{it.metric}}</span></sc-if>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-for>
+            <div style="display: flex; align-items: center; gap: 10px; border-top: 1px solid #DADCE8; padding: 10px 10px 0;">
+              <span style="flex-grow: 1; font-size: 12px; line-height: 16px; color: #474945;">{{srFootText}}</span>
+              <button type="button" onClick="{{srAdvanced}}" style="height: 34px; display: flex; align-items: center; gap: 6px; padding: 0 14px; border: none; border-radius: 8px; background: #24285D; color: #FFFFFF; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"></path></svg>
+                {{srAdvLabel}}</button>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+    <div style="{{hdrSpacer}}"></div>
       <sc-if value="{{isHome}}" hint-placeholder-val="{{true}}"><div style="{{homeBarStyle}}">
         <button type="button" onClick="{{homeToggleEdit}}" aria-expanded="{{homeEditAttr}}" aria-label="Customize Home" title="Customize Home" style="{{homeEditBtn}}">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.5"></rect><rect x="13" y="4" width="7" height="7" rx="1.5"></rect><rect x="4" y="13" width="7" height="7" rx="1.5"></rect><path d="M16.5 13.5v6M13.5 16.5h6"></path></svg>
@@ -52,9 +149,9 @@
         </sc-if>
       </div></sc-if>
     <sc-if value="{{wide}}" hint-placeholder-val="{{true}}">
-      <span style="height: 40px; display: flex; align-items: center; gap: 6px; padding: 0 14px; border: 1px solid #DADCE8; border-radius: 999px; background: #FFFFFF; font-size: 14px; font-weight: 600;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>
-        {{d.territory}}
+      <span title="{{d.territory}}" style="height: 40px; min-width: 0; flex-shrink: 1; display: flex; align-items: center; gap: 6px; padding: 0 14px; box-sizing: border-box; border: 1px solid #DADCE8; border-radius: 999px; background: #FFFFFF; font-size: 14px; font-weight: 600;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>
+        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{d.territory}}</span>
       </span>
     </sc-if>
     <button type="button" aria-label="Notifications" style="width: 40px; height: 40px; border-radius: 999px; border: 1px solid #DADCE8; background: #FFFFFF; color: #24285D; display: flex; align-items: center; justify-content: center; cursor: pointer;">
@@ -1367,6 +1464,196 @@
       </div>
     </sc-if>
 
+    <sc-if value="{{isSearch}}" hint-placeholder-val="{{false}}">
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <sc-if value="{{srPageInput}}" hint-placeholder-val="{{false}}">
+          <label style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 6px 0 14px; box-sizing: border-box; border: 1px solid #8286A8; border-radius: 999px; background: #FFFFFF;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex-shrink: 0; color: #474945;"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+            <input id="ig-search-page" type="text" autocomplete="off" aria-label="Search" placeholder="{{srPlaceholder}}" value="{{srQ}}" onInput="{{srOnInput}}" onKeyDown="{{srOnKey}}" style="flex: 1 1 auto; min-width: 0; height: 100%; border: none; outline: none; background: transparent; color: #24285D; font-family: inherit; font-size: 15px; padding: 0;">
+            <sc-if value="{{srHasQ}}" hint-placeholder-val="{{false}}">
+              <button type="button" onClick="{{srClear}}" aria-label="Clear search" style="width: 32px; height: 32px; flex-shrink: 0; border: none; border-radius: 999px; background: transparent; color: #474945; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+              </button>
+            </sc-if>
+          </label>
+        </sc-if>
+        <div role="tablist" aria-label="Search categories" style="{{srTabsStyle}}">
+          <sc-for list="{{srTabs}}" as="st" hint-placeholder-count="6">
+            <button type="button" role="tab" onClick="{{st.pick}}" aria-selected="{{st.pressed}}" style="{{st.style}}">{{st.label}}<span style="{{st.countStyle}}">{{st.count}}</span></button>
+          </sc-for>
+        </div>
+
+        <div style="position: relative; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <sc-for list="{{srPills}}" as="f" hint-placeholder-count="4">
+              <span style="display: flex; align-items: center;">
+                <button type="button" onClick="{{f.toggle}}" aria-expanded="{{f.open}}" title="{{f.title}}" style="{{f.style}}">
+                  <sc-if value="{{f.ai}}" hint-placeholder-val="{{false}}">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A34F00" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.9L19 9.7l-5.2 1.8L12 16.5l-1.8-5L5 9.7l5.2-1.8z"></path></svg>
+                  </sc-if>
+                  <sc-if value="{{f.locked}}" hint-placeholder-val="{{false}}">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+                  </sc-if>
+                  <sc-if value="{{f.on}}" hint-placeholder-val="{{false}}"><span>{{f.label}}: <span style="font-weight: 600;">{{f.val}}</span></span></sc-if>
+                  <sc-if value="{{f.off}}" hint-placeholder-val="{{true}}"><span style="font-weight: 600;">{{f.label}}</span></sc-if>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+                </button>
+                <sc-if value="{{f.on}}" hint-placeholder-val="{{false}}">
+                  <button type="button" onClick="{{f.clear}}" aria-label="Remove {{f.label}} filter" style="width: 24px; height: 24px; margin-left: -2px; border: none; border-radius: 999px; background: transparent; color: #474945; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+                  </button>
+                </sc-if>
+              </span>
+            </sc-for>
+            <sc-if value="{{srHasFilters}}" hint-placeholder-val="{{false}}">
+              <button type="button" onClick="{{srResetF}}" style="height: 30px; border: none; background: transparent; color: #474945; font-family: inherit; font-size: 13px; cursor: pointer; padding: 0 6px; text-decoration: underline;">Reset</button>
+            </sc-if>
+            <div style="flex-grow: 1;"></div>
+            <sc-if value="{{srHasGenie}}" hint-placeholder-val="{{true}}">
+              <button type="button" onClick="{{srGenieRun}}" style="height: 32px; display: flex; align-items: center; gap: 6px; padding: 0 10px; border: 1px solid #DADCE8; border-radius: 8px; background: #FFFFFF; color: #24285D; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A34F00" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.9L19 9.7l-5.2 1.8L12 16.5l-1.8-5L5 9.7l5.2-1.8z"></path></svg>
+                {{srGenieQ}}</button>
+            </sc-if>
+            <span style="position: relative;">
+              <button type="button" onClick="{{srSortToggle}}" aria-expanded="{{srSortOpen}}" style="height: 32px; display: flex; align-items: center; gap: 6px; padding: 0 10px; border: 1px solid #DADCE8; border-radius: 8px; background: #FFFFFF; color: #24285D; font-family: inherit; font-size: 13px; cursor: pointer; white-space: nowrap;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"></path></svg>
+                <span>Sort: <span style="font-weight: 600;">{{srSortLabel}}</span></span></button>
+              <sc-if value="{{srSortPop}}" hint-placeholder-val="{{false}}">
+                <div role="dialog" aria-label="Sort results" style="{{srSortPopStyle}}">
+                  <sc-for list="{{srSorts}}" as="so" hint-placeholder-count="4">
+                    <button type="button" onClick="{{so.pick}}" aria-pressed="{{so.checked}}" style="{{so.style}}">{{so.label}}
+                      <sc-if value="{{so.on}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></sc-if></button>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </span>
+          </div>
+
+          <sc-if value="{{srPopOpen}}" hint-placeholder-val="{{false}}">
+            <div role="dialog" aria-label="Filter by {{srPopTitle}}" style="{{srPopStyle}}">
+              <span style="font-size: 12px; line-height: 16px; font-weight: 600; color: #474945; padding: 2px 8px 6px;">{{srPopTitle}}</span>
+              <sc-for list="{{srPopOpts}}" as="o" hint-placeholder-count="4">
+                <button type="button" role="menuitemcheckbox" aria-checked="{{o.checked}}" onClick="{{o.pick}}" style="min-height: 34px; display: flex; align-items: center; gap: 10px; padding: 0 8px; border: none; border-radius: 6px; background: transparent; color: #24285D; font-family: inherit; font-size: 14px; cursor: pointer; text-align: left;">
+                  <span aria-hidden="true" style="{{o.box}}"><sc-if value="{{o.on}}" hint-placeholder-val="{{false}}"><sc-if value="{{o.check}}" hint-placeholder-val="{{true}}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg></sc-if><sc-if value="{{o.radio}}" hint-placeholder-val="{{false}}"><span style="width: 6px; height: 6px; border-radius: 999px; background: #FFFFFF;"></span></sc-if></sc-if></span>
+                  {{o.label}}</button>
+              </sc-for>
+              <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #DADCE8; padding: 8px 4px 0; margin-top: 4px;">
+                <button type="button" onClick="{{srPopClear}}" style="border: none; background: transparent; color: #24285D; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; padding: 0; text-decoration: underline;">Clear</button>
+                <button type="button" onClick="{{srPopClose}}" style="height: 30px; padding: 0 14px; border: 1px solid #24285D; border-radius: 8px; background: #24285D; color: #FFFFFF; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;">Done</button>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{srHasBanner}}" hint-placeholder-val="{{false}}">
+            <div role="status" style="background: #F4F5F9; border: 1px solid #F89624; border-radius: 10px; padding: 10px 14px; display: flex; gap: 10px; align-items: center;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A34F00" stroke-width="2" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M12 3l1.8 4.9L19 9.7l-5.2 1.8L12 16.5l-1.8-5L5 9.7l5.2-1.8z"></path></svg>
+              <span style="flex-grow: 1; font-size: 14px; line-height: 20px;">{{srBannerText}}</span>
+              <button type="button" onClick="{{srUndo}}" style="border: none; background: transparent; color: #24285D; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: underline; padding: 0;">Undo</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{srGated}}" hint-placeholder-val="{{false}}">
+            <div role="note" style="display: flex; gap: 8px; align-items: center; font-size: 13px; line-height: 18px; color: #474945;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+              {{srGatedText}}</div>
+          </sc-if>
+        </div>
+
+        <section aria-label="Search results" style="{{cardStyle}}">
+          <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;">
+            <span style="font-family: Montserrat, sans-serif; font-size: 16px; line-height: 22px; font-weight: 700;">{{srCountLine}}</span>
+          </div>
+          <sc-if value="{{srHasRows}}" hint-placeholder-val="{{true}}">
+            <div role="list" style="display: flex; flex-direction: column; margin: 0 -4px;">
+              <sc-if value="{{wide}}" hint-placeholder-val="{{true}}">
+                <div aria-hidden="true" style="{{srHeadStyle}}">
+                  <span>{{srNameLabel}}</span>
+                  <sc-for list="{{srHead}}" as="h" hint-placeholder-count="4"><span>{{h}}</span></sc-for>
+                  <span></span>
+                </div>
+              </sc-if>
+              <sc-for list="{{srRows}}" as="r" hint-placeholder-count="5">
+                <div role="listitem" id="{{r.id}}" style="{{r.rowStyle}}">
+                  <div style="{{r.mainStyle}}">
+                    <button type="button" onClick="{{r.toggle}}" aria-expanded="{{r.expanded}}" style="display: flex; align-items: center; gap: 12px; min-width: 0; border: none; background: transparent; color: #24285D; font-family: inherit; text-align: left; cursor: pointer; padding: 0;">
+                      <sc-if value="{{r.isPerson}}" hint-placeholder-val="{{true}}"><span aria-hidden="true" style="{{r.avatar}}">{{r.initials}}</span></sc-if>
+                      <sc-if value="{{r.isLender}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="{{r.avatar}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18L12 4z"></path><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"></path></svg></span></sc-if>
+                      <sc-if value="{{r.isOffice}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="{{r.avatar}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="1.5"></rect><path d="M9 7h2M13 7h2M9 11h2M13 11h2M10 21v-4h4v4"></path></svg></span></sc-if>
+                      <sc-if value="{{r.isTitle}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="{{r.avatar}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7z"></path><path d="M14 3v4h4M10 14l2 2 3-4"></path></svg></span></sc-if>
+                      <sc-if value="{{r.isProperty}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="{{r.avatar}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 4l8 7"></path><path d="M6 10v10h12V10"></path><path d="M10 20v-5h4v5"></path></svg></span></sc-if>
+                      <span style="min-width: 0; display: flex; flex-direction: column;">
+                        <span style="font-size: 14px; line-height: 20px; font-weight: 600;">{{r.name}}</span>
+                        <span style="font-size: 12px; line-height: 17px; color: #474945;">{{r.sub}}</span>
+                      </span>
+                    </button>
+                    <sc-if value="{{wide}}" hint-placeholder-val="{{true}}">
+                      <sc-for list="{{r.cells}}" as="c" hint-placeholder-count="4">
+                        <span title="{{c.title}}" style="font-size: 14px; line-height: 20px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                          <sc-if value="{{c.isTag}}" hint-placeholder-val="{{false}}"><x-import component-from-global-scope="InGenius.Tag" tone="{{c.tone}}">{{c.text}}</x-import></sc-if>
+                          <sc-if value="{{c.plain}}" hint-placeholder-val="{{true}}"><span style="{{c.textStyle}}">{{c.text}}</span></sc-if>
+                        </span>
+                      </sc-for>
+                    </sc-if>
+                    <sc-if value="{{compact}}" hint-placeholder-val="{{false}}">
+                      <div style="display: flex; flex-wrap: wrap; gap: 4px 14px; padding-left: 48px; font-size: 13px; line-height: 18px;">
+                        <sc-for list="{{r.cells}}" as="c" hint-placeholder-count="4">
+                          <span><span style="color: #474945;">{{c.label}} </span><span style="font-weight: 600;">{{c.text}}</span></span>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                    <div style="{{srActCell}}">
+                      <button type="button" onClick="{{r.act}}" style="{{r.actStyle}}">{{r.actLabel}}</button>
+                    </div>
+                  </div>
+                  <sc-if value="{{r.open}}" hint-placeholder-val="{{false}}">
+                    <div style="{{srDetailGrid}}">
+                      <sc-for list="{{r.detail}}" as="dt" hint-placeholder-count="6">
+                        <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
+                          <span style="font-size: 12px; line-height: 16px; color: #474945;">{{dt.label}}</span>
+                          <span style="font-size: 14px; line-height: 20px; font-weight: 600;">{{dt.text}}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <div style="{{srActionsRow}}">
+                      <button type="button" onClick="{{r.remind}}" style="height: 34px; display: flex; align-items: center; gap: 6px; padding: 0 12px; border: 1px solid #8286A8; border-radius: 8px; background: #FFFFFF; color: #24285D; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg>{{r.remindLabel}}</button>
+                      <button type="button" onClick="{{r.touch}}" style="height: 34px; display: flex; align-items: center; gap: 6px; padding: 0 12px; border: 1px solid #8286A8; border-radius: 8px; background: #FFFFFF; color: #24285D; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H8l-4 4z"></path></svg>{{r.touchLabel}}</button>
+                      <sc-for list="{{r.links}}" as="lk" hint-placeholder-count="1">
+                        <button type="button" onClick="{{lk.go}}" style="height: 34px; display: flex; align-items: center; gap: 4px; padding: 0 8px; border: none; background: transparent; color: #24285D; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;">{{lk.label}}
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg></button>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px; border-top: 1px solid #DADCE8; padding-top: 12px;">
+              <span style="flex-grow: 1; font-size: 13px; color: #474945;">{{srShowing}}</span>
+              <sc-if value="{{srMore}}" hint-placeholder-val="{{true}}">
+                <button type="button" onClick="{{srShowMore}}" style="height: 34px; padding: 0 14px; border: 1px solid #24285D; border-radius: 8px; background: #FFFFFF; color: #24285D; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;">{{srMoreLabel}}</button>
+              </sc-if>
+            </div>
+          </sc-if>
+          <sc-if value="{{srNoRows}}" hint-placeholder-val="{{false}}">
+            <div style="border: 1px dashed #8286A8; border-radius: 10px; padding: 20px; display: flex; flex-direction: column; gap: 10px; align-items: flex-start;">
+              <span style="font-size: 15px; line-height: 22px; font-weight: 600;">{{srNoRowsText}}</span>
+              <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <sc-if value="{{srHasFilters}}" hint-placeholder-val="{{false}}">
+                  <button type="button" onClick="{{srResetF}}" style="height: 34px; padding: 0 14px; border: 1px solid #24285D; border-radius: 8px; background: #24285D; color: #FFFFFF; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;">Clear filters</button>
+                </sc-if>
+                <sc-if value="{{srHasOthers}}" hint-placeholder-val="{{false}}">
+                  <span style="font-size: 13px; line-height: 34px; color: #474945;">Matches in</span>
+                  <sc-for list="{{srOthers}}" as="ot" hint-placeholder-count="2">
+                    <button type="button" onClick="{{ot.go}}" style="height: 34px; padding: 0 12px; border: 1px solid #8286A8; border-radius: 999px; background: #FFFFFF; color: #24285D; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;">{{ot.label}}</button>
+                  </sc-for>
+                </sc-if>
+              </div>
+            </div>
+          </sc-if>
+        </section>
+      </div>
+    </sc-if>
+
   </main>
 
   <sc-if value="{{aiPopOpen}}" hint-placeholder-val="{{false}}">
@@ -1612,6 +1899,9 @@
       </sc-if>
     </div>
   </sc-if>
+  <sc-if value="{{srBackdrop}}" hint-placeholder-val="{{false}}">
+    <div aria-hidden="true" onClick="{{srClose}}" style="position: absolute; z-index: 19; top: 0; left: 0; right: 0; bottom: 0;"></div>
+  </sc-if>
 </div>
 </template>
 <script src="src/runtime.js"></script>
@@ -1625,6 +1915,8 @@
 <script src="src/lib/flow.js"></script>
 <script src="src/lib/sankey.js"></script>
 <script src="src/data/pipeline.js"></script>
+<script src="src/data/directory.js"></script>
+<script src="src/lib/search.js"></script>
 <script src="src/app.js"></script>
 <script src="src/main.js"></script>
 </body>
