@@ -98,4 +98,30 @@ for (const persona of ['Loan officer', 'Lender executive', 'Recruiter', 'Account
     c.state.tab = 'home'; v = c.renderVals(); v.srOnInput({ target: { value: 'zzqx' } }); v = c.renderVals(); ok(v.srNoHits, 'quick search empty state');
   }
 }
+// Menu settings: position, order, show/hide, icon-only labels, phone overflow under More, reset, and saving.
+{
+  const store = {}; global.localStorage = { getItem: k => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); } };
+  const c = new Component({ persona: 'Loan officer', compact: false, allowCompare: true });
+  let v = c.renderVals();
+  ok(v.navPos === 'bottom' && v.menu.length === 5 && v.navIsDefault, 'menu starts at the bottom with every item');
+  c.state.modal = 'settings'; v = c.renderVals(); ok(v.modalSettings && v.navItems.length === 5 && v.navItems[0].locked, 'settings lists the menu items with Home locked first');
+  v.navPositions[1].pick(); v = c.renderVals(); ok(v.navPos === 'left' && /flex-direction: column/.test(v.menuStyle) && /232px/.test(v.mainStyle), 'left rail');
+  v.navPositions[2].pick(); v = c.renderVals(); ok(v.navPos === 'top' && /order: 1/.test(v.menuStyle) && /order: 2/.test(v.mainStyle) && /display: none/.test(v.fadeStyle), 'top bar');
+  v.navItems[3].up(); v = c.renderVals(); ok(v.menu.map(m => m.label).join() === 'Home,Explore,Reports,Action items,My pipeline', 'arrows reorder');
+  v.navItems[1].dragStart({}); v.navItems[4].drop({ preventDefault() {} }); v = c.renderVals(); ok(v.menu[4].label === 'Explore', 'drag and drop reorders');
+  v.navItems[1].up(); v = c.renderVals(); ok(v.menu[0].label === 'Home', 'Home stays first');
+  v.navItems[1].toggle(); v.navItems[2].toggle(); v = c.renderVals(); ok(v.menu.length === 3, 'items can be hidden');
+  v.navItems[3].toggle(); v = c.renderVals(); ok(v.menu.length === 2 && v.navItems[4].showDisabled, 'at least two items stay visible');
+  v.navLabelOpts[1].pick(); v = c.renderVals(); ok(!v.menu[0].showLabel && v.menu[0].aria === 'Home', 'icons only keeps an accessible name');
+  ok(JSON.parse(store['ingenius.menu']).pos === 'top', 'settings are saved');
+  const again = new Component({ persona: 'Recruiter', compact: false, allowCompare: true }); ok(again.renderVals().menu.length === 2, 'settings load on the next visit');
+  v.personaList[2].pick(); v = c.renderVals(); ok(v.menu.length === 2, 'settings survive a persona switch');
+  v.navReset(); v = c.renderVals(); ok(v.navIsDefault && v.menu.length === 5, 'reset to default');
+  const ph = new Component({ persona: 'Loan officer', compact: true, allowCompare: true });
+  ph.state.nav.pos = 'left'; v = ph.renderVals(); ok(v.navPos === 'bottom' && !v.navHasMore, 'phone keeps the bottom bar');
+  ph.setNav({ phoneMax: 3 }); v = ph.renderVals(); ok(v.menu.length === 2 && v.navHasMore && v.navMoreItems.length === 3, 'phone overflow goes under More');
+  v.navMoreToggle(); v = ph.renderVals(); ok(v.navMoreOpen, 'More opens');
+  v.navMoreItems[2].go(); v = ph.renderVals(); ok(ph.state.tab === 'crm' && !v.navMoreOpen && v.navMoreCurrent === 'true', 'More item opens its page and marks More current');
+  delete global.localStorage;
+}
 console.log('ok: ' + checks + ' checks passed');
