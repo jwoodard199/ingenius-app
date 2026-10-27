@@ -1822,6 +1822,12 @@
         <sc-if value="{{navMoreShowLabel}}" hint-placeholder-val="{{true}}"><span>More</span></sc-if>
       </button>
     </sc-if>
+    <sc-if value="{{navCanCollapse}}" hint-placeholder-val="{{true}}">
+      <button type="button" onClick="{{navCollapse}}" aria-pressed="{{navCollapsePressed}}" aria-label="{{navCollapseLabel}}" title="{{navCollapseLabel}}" style="{{navCollapseStyle}}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{navChevron}}"><path d="m7 6 6 6-6 6M13 6l6 6-6 6"></path></svg>
+        <sc-if value="{{navExpanded}}" hint-placeholder-val="{{true}}"><span>Collapse</span></sc-if>
+      </button>
+    </sc-if>
   </nav>
   <sc-if value="{{navMoreOpen}}" hint-placeholder-val="{{false}}">
     <div aria-hidden="true" onClick="{{navMoreClose}}" style="position: absolute; z-index: 31; top: 0; left: 0; right: 0; bottom: 0;"></div>
@@ -1937,9 +1943,8 @@
           <div role="group" aria-labelledby="set-pos" style="display: flex; flex-wrap: wrap; gap: 8px;">
             <sc-for list="{{navPositions}}" as="o" hint-placeholder-count="3">
               <button type="button" onClick="{{o.pick}}" aria-pressed="{{o.pressed}}" style="{{o.style}}">
-                <sc-if value="{{o.isBottom}}" hint-placeholder-val="{{true}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2"></rect><path d="M8 16.5h8" stroke-width="2.6" stroke-linecap="round"></path></svg></sc-if>
-                <sc-if value="{{o.isLeft}}" hint-placeholder-val="{{false}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2"></rect><path d="M7 8.5v7" stroke-width="2.6" stroke-linecap="round"></path></svg></sc-if>
-                <sc-if value="{{o.isTop}}" hint-placeholder-val="{{false}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2"></rect><path d="M8 8.5h8" stroke-width="2.6" stroke-linecap="round"></path></svg></sc-if>
+                <sc-if value="{{o.isRight}}" hint-placeholder-val="{{false}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2"></rect><path d="M15.5 4.5v15"></path></svg></sc-if>
+                <sc-if value="{{o.isTop}}" hint-placeholder-val="{{true}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2"></rect><path d="M3.5 9h17"></path></svg></sc-if>
                 <span>{{o.label}}</span>
               </button>
             </sc-for>

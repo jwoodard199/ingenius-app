@@ -2,9 +2,11 @@
 // Saved in this browser only; in production they would live on the user's profile.
 var NAV_KEY = 'ingenius.menu';
 var NAV_IDS = ['home', 'explore', 'actions', 'reports', 'crm'];
-var NAV_POS = ['bottom', 'left', 'top'];
+// Desktop only: a bar docked under the header, or a rail docked to the right edge. Phones always use the bottom bar.
+var NAV_POS = ['top', 'right'];
+var NAV_RAIL = { open: 220, icons: 72 };
 var NAV_MIN_SHOWN = 2;
-function navDefault() { return { pos: 'bottom', order: NAV_IDS.slice(), hidden: {}, icons: false, phoneMax: 5 }; }
+function navDefault() { return { pos: 'top', order: NAV_IDS.slice(), hidden: {}, icons: false, phoneMax: 5 }; }
 // Keeps saved settings valid as menu items change: unknown ids drop out, new ones join the end, Home stays first.
 function navClean(raw) {
   var n = navDefault();
@@ -1294,7 +1296,7 @@ class Component extends DCLogic {
   // The main menu (bottom, left or top, phone overflow under More) and the Settings dialog that arranges it.
   navVals(compact, remaining) {
     var self = this, s = this.state, d = this.data(), tab = s.tab, nav = s.nav;
-    var pos = compact ? 'bottom' : nav.pos, side = pos === 'left', icons = !!nav.icons;
+    var pos = compact ? 'bottom' : nav.pos, side = pos === 'right', icons = !!nav.icons;
     var defs = { home: { label: 'Home' }, explore: { label: 'Explore' }, actions: { label: 'Action items', short: 'Actions' }, reports: { label: 'Reports' },
       crm: { label: d.crmTitle, short: d.crmTitle.split(' ').pop().replace(/^./, function (ch) { return ch.toUpperCase(); }) } };
     var shown = nav.order.filter(function (id) { return !nav.hidden[id]; });
@@ -1310,20 +1312,23 @@ class Component extends DCLogic {
       var m = defs[id], on = tab === id, label = compact && m.short ? m.short : m.label;
       return Object.assign(kinds(id), { label: label, showLabel: !icons, aria: icons ? m.label : false, title: icons ? m.label : false, current: on ? 'page' : 'false',
         hasBadge: id === 'actions' && remaining > 0,
-        badgeStyle: badgeBase + (corner ? 'position: absolute; top: ' + (compact ? '3px' : '2px') + '; left: calc(50% + 3px); min-width: 17px; height: 17px; padding: 0 4px; font-size: 10px; line-height: 15px; border: 1px solid ' + (on ? '#FFFFFF' : '#24285D') + ';' : 'min-width: 20px; height: 20px; padding: 0 6px; font-size: 11px; line-height: 20px;' + (side ? ' margin-left: auto;' : '')),
+        badgeStyle: badgeBase + (corner ? 'position: absolute; top: ' + (compact ? '3px' : '6px') + '; left: calc(50% + 3px); min-width: 17px; height: 17px; padding: 0 4px; font-size: 10px; line-height: 15px; border: 1px solid ' + (on && side ? '#FFFFFF' : '#24285D') + ';' : 'min-width: 20px; height: 20px; padding: 0 6px; font-size: 11px; line-height: 20px;' + (side ? ' margin-left: auto;' : '')),
         go: go(id),
-        style: FONT + 'display: flex; align-items: center; justify-content: ' + (side && !icons ? 'flex-start' : 'center') + '; gap: ' + (compact
-          ? '2px; position: relative; flex-direction: column; flex: 1 1 0; min-height: ' + (icons ? '44px' : '52px') + '; padding: 4px 2px; font-size: 11px; border-radius: 12px;'
-          : (icons ? '8px; position: relative; width: 44px; min-height: 44px; padding: 0;' : side ? '10px; min-height: 44px; padding: 0 14px; width: 100%;' : '8px; min-height: 44px; padding: 0 16px;') + ' font-size: 14px; border-radius: 999px; box-sizing: border-box;')
-          + ' border: none; font-weight: 600; cursor: pointer; white-space: nowrap; ' + (on ? 'background: #FFFFFF; color: #24285D;' : 'background: transparent; color: #EEF0F8;') });
+        style: FONT + 'display: flex; align-items: center; position: relative; border: none; font-weight: 600; cursor: pointer; white-space: nowrap; box-sizing: border-box; ' + (compact
+          ? 'justify-content: center; gap: 2px; flex-direction: column; flex: 1 1 0; min-height: ' + (icons ? '44px' : '52px') + '; padding: 4px 2px; font-size: 11px; border-radius: 12px; ' + (on ? 'background: #FFFFFF; color: #24285D;' : 'background: transparent; color: #EEF0F8;')
+          // Right rail: full-width rows, the current page as a white row.
+          : side ? 'gap: 12px; width: 100%; min-height: 44px; font-size: 14px; border-radius: 10px; ' + (icons ? 'justify-content: center; padding: 0;' : 'justify-content: flex-start; padding: 0 14px;') + (on ? 'background: #FFFFFF; color: #24285D;' : 'background: transparent; color: #DDE0EE;')
+          // Top bar: tabs with an orange underline on the current page.
+          : 'justify-content: center; gap: 8px; height: 48px; font-size: 14px; border-radius: 0; ' + (icons ? 'width: 52px; padding: 0;' : 'padding: 0 16px;') + (on ? 'background: rgba(255,255,255,0.10); color: #FFFFFF; box-shadow: inset 0 -3px 0 #F89624;' : 'background: transparent; color: #C9CCE3;')) });
     });
     var moreOn = extra.indexOf(tab) >= 0, moreOpen = !!s.navMore && extra.length > 0;
-    var shell = 'display: flex; background: #24285D; border: 1px solid #15183A; box-sizing: border-box; box-shadow: 0 2px 4px rgba(21,24,58,0.20), 0 12px 32px rgba(21,24,58,0.30); ';
-    var menuStyle = compact ? 'position: absolute; z-index: 30; align-items: center; left: 8px; right: 80px; bottom: 8px; gap: 2px; padding: 6px; border-radius: 18px;'
-      // Left and top stay under the header (z-index 20), so the search dropdown still opens over them.
-      : side ? 'position: absolute; z-index: 15; left: 16px; top: 88px; flex-direction: column; align-items: stretch; gap: 4px; padding: 6px; border-radius: ' + (icons ? '999px;' : '20px; width: 184px;')
-      : pos === 'top' ? 'position: relative; z-index: 15; order: 1; flex-shrink: 0; align-self: center; align-items: center; max-width: calc(100% - 80px); overflow-x: auto; margin: 0 0 16px; gap: 4px; padding: 6px; border-radius: 999px;'
-      : 'position: absolute; z-index: 30; align-items: center; left: 50%; bottom: 24px; transform: translateX(-50%); gap: 4px; padding: 6px; border-radius: 999px;';
+    var railW = icons ? NAV_RAIL.icons : NAV_RAIL.open;
+    var menuStyle = compact ? 'display: flex; position: absolute; z-index: 30; align-items: center; left: 8px; right: 80px; bottom: 8px; gap: 2px; padding: 6px; border-radius: 18px; background: #24285D; border: 1px solid #15183A; box-sizing: border-box; box-shadow: 0 2px 4px rgba(21,24,58,0.20), 0 12px 32px rgba(21,24,58,0.30);'
+      // Docked to the right edge from the header down; it stays under the header (z-index 20) so the search dropdown opens over it.
+      : side ? 'display: flex; position: absolute; z-index: 15; right: 0; top: 64px; bottom: 0; width: ' + railW + 'px; flex-direction: column; align-items: stretch; gap: 4px; padding: 16px 12px; box-sizing: border-box; background: #24285D; border-left: 1px solid #15183A;'
+      // Docked under the header, full width, in the page flow (order 1, between the header and the page).
+      : 'display: flex; position: relative; z-index: 15; order: 1; flex-shrink: 0; align-items: stretch; gap: 2px; padding: 0 40px; margin-bottom: 16px; overflow-x: auto; background: #24285D; box-shadow: 0 2px 6px rgba(21,24,58,0.18);';
+    var colBtn = FONT + 'display: flex; align-items: center; gap: 10px; flex-shrink: 0; border: none; background: transparent; color: #C9CCE3; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; box-sizing: border-box; ';
 
     // Settings dialog: menu items in order. Home stays first; at least NAV_MIN_SHOWN items stay visible.
     var shownCount = nav.order.filter(function (id) { return !nav.hidden[id]; }).length;
@@ -1362,8 +1367,15 @@ class Component extends DCLogic {
     });
     var choice = function (on) { return (on ? PILL_ON : PILL_OFF) + ' display: inline-flex; align-items: center; gap: 8px; min-height: 40px;'; };
     return {
-      menu: menu, navPos: pos, navTop: pos === 'top', navNotTop: pos !== 'top', menuStyle: shell + menuStyle,
-      fadeStyle: pos === 'bottom' ? 'position: absolute; z-index: 29; left: 0; right: 0; bottom: 0; pointer-events: none; height: ' + (compact ? '96px' : '130px') + '; background: linear-gradient(to bottom, rgba(238,240,246,0), rgba(238,240,246,0.92) 55%, #EEF0F6);' : 'display: none;',
+      menu: menu, navPos: pos, navRailW: side ? railW : 0, menuStyle: menuStyle,
+      // Collapse to icons only, from the menu itself (desktop). Same setting as Settings > Menu labels.
+      navCanCollapse: !compact, navCollapsed: icons, navExpanded: !icons,
+      navCollapseLabel: icons ? 'Expand menu' : 'Collapse menu to icons', navCollapsePressed: icons ? 'true' : 'false',
+      navCollapse: function () { self.setNav({ icons: !self.state.nav.icons }); },
+      navCollapseStyle: colBtn + (side ? 'margin-top: auto; min-height: 40px; border-radius: 10px; ' + (icons ? 'justify-content: center; padding: 0;' : 'padding: 0 14px;') : 'margin-left: auto; height: 48px; padding: 0 12px;'),
+      // Chevron points the way the menu will move: a rail collapses toward the right edge, the top bar toward the left.
+      navChevron: 'display: block; flex-shrink: 0; transform: rotate(' + (side ? (icons ? 180 : 0) : (icons ? 0 : 180)) + 'deg);',
+      fadeStyle: compact ? 'position: absolute; z-index: 29; left: 0; right: 0; bottom: 0; pointer-events: none; height: ' + (compact ? '96px' : '130px') + '; background: linear-gradient(to bottom, rgba(238,240,246,0), rgba(238,240,246,0.92) 55%, #EEF0F6);' : 'display: none;',
       navHasMore: extra.length > 0, navMoreOpen: moreOpen, navMoreExpanded: moreOpen ? 'true' : 'false', navMoreLabel: icons ? '' : 'More', navMoreShowLabel: !icons,
       navMoreCurrent: moreOn ? 'true' : 'false',
       navMoreToggle: function () { self.setState({ navMore: !s.navMore, aiPop: false, srOpen: false }); },
@@ -1377,9 +1389,9 @@ class Component extends DCLogic {
       navMoreStyle: 'position: absolute; z-index: 32; right: 80px; bottom: 84px; width: 220px; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 14px; padding: 6px; display: flex; flex-direction: column; gap: 2px; box-shadow: 0 12px 32px rgba(36,40,93,0.22);',
       navBadgeInline: 'margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; background: #F89624; color: #24285D; font-size: 11px; line-height: 20px; font-weight: 700; text-align: center;',
       // Settings dialog values.
-      navPositions: [{ id: 'bottom', label: 'Bottom' }, { id: 'left', label: 'Left' }, { id: 'top', label: 'Top' }].map(function (o) {
+      navPositions: [{ id: 'top', label: 'Top bar' }, { id: 'right', label: 'Right side' }].map(function (o) {
         var on = nav.pos === o.id;
-        return { label: o.label, pressed: on ? 'true' : 'false', style: choice(on), isBottom: o.id === 'bottom', isLeft: o.id === 'left', isTop: o.id === 'top',
+        return { label: o.label, pressed: on ? 'true' : 'false', style: choice(on), isRight: o.id === 'right', isTop: o.id === 'top',
           pick: function () { self.setNav({ pos: o.id }); } };
       }),
       navPhoneNote: compact,
@@ -1493,15 +1505,15 @@ class Component extends DCLogic {
     return Object.assign(this.reportVals(compact), this.pipeVals(compact), this.homeVals(compact), this.searchVals(compact), nv, {
       d: dd, compact: compact, wide: !compact,
       rootStyle: VARS + FONT + 'position: relative; overflow: hidden; display: flex; flex-direction: column; background: #EEF0F6; color: #24285D; ' + 'width: 100%; height: 100%;',
-      headerStyle: 'position: relative; z-index: ' + (compact && s.srOpen && tab !== 'search' ? '60' : '20') + '; flex-shrink: 0; display: flex; align-items: center; box-sizing: border-box; ' + (compact ? 'gap: 10px; min-height: 56px; padding: 8px 16px;' : 'gap: 16px; min-height: 64px; padding: 12px 40px; margin-bottom: 16px;') + ' background: #FFFFFF; border-bottom: 1px solid #DADCE8; box-shadow: 0 1px 3px rgba(36,40,93,0.06);',
+      headerStyle: 'position: relative; z-index: ' + (compact && s.srOpen && tab !== 'search' ? '60' : '20') + '; flex-shrink: 0; display: flex; align-items: center; box-sizing: border-box; ' + (compact ? 'gap: 10px; min-height: 56px; padding: 8px 16px;' : 'gap: 16px; min-height: 64px; padding: 12px 40px; margin-bottom: ' + (nv.navPos === 'top' ? '0;' : '16px;')) + ' background: #FFFFFF; border-bottom: 1px solid #DADCE8; box-shadow: 0 1px 3px rgba(36,40,93,0.06);',
       hdrSpacer: 'flex-grow: 1;',
       logoStyle: 'display: block; flex-shrink: 0; ' + (compact ? 'order: -2; width: 26px; height: 34px;' : 'width: 28px; height: 36px;'),
       pageTitle: titles[tab],
       acctName: !compact && !!this.props.roomy,
       acctAria: 'Signed in as ' + d.name + ', ' + d.role + '. Switch persona (prototype)',
       acctStyle: FONT + 'display: flex; align-items: center; gap: 10px; min-width: 0; flex-shrink: 1; padding: 0; border: none; background: transparent; cursor: pointer; text-align: right;',
-      // A left rail pushes the page right; a top bar sits between the header and the page (order 1), so the page moves to order 2.
-      mainStyle: 'flex-grow: 1; min-height: 0; overflow-y: auto; box-sizing: border-box; ' + (compact ? 'padding: 20px 16px 96px;' : nv.navPos === 'left' ? 'padding: 8px 40px 120px ' + (s.nav.icons ? '104px;' : '232px;') : nv.navPos === 'top' ? 'order: 2; padding: 8px 40px 120px;' : 'padding: 8px 40px 120px;'),
+      // The right rail takes its width off the page (margin, so the page's scrollbar stays visible); the top bar sits between the header and the page (order 1).
+      mainStyle: 'flex-grow: 1; min-height: 0; overflow-y: auto; box-sizing: border-box; ' + (compact ? 'padding: 20px 16px 96px;' : 'order: 2; padding: 8px 40px 112px; margin-right: ' + nv.navRailW + 'px;'),
       // Desktop: Action items floats right and the other widgets wrap around it, going full width once they pass its bottom.
       gridStyle: compact ? 'display: grid; gap: 20px; align-items: start; grid-template-columns: repeat(1, minmax(0, 1fr));' : 'display: flow-root;',
       homeSideStyle: 'display: flex; flex-direction: column; gap: 20px; min-width: 0; ' + (compact ? 'order: 1;' : 'float: right; width: calc((100% - 20px) / 3); margin: 0 0 20px 20px;'),
@@ -1538,7 +1550,7 @@ class Component extends DCLogic {
       log: s.log.concat(d.log),
       remaining: remaining,
       aiExpanded: s.aiPop ? 'true' : 'false',
-      aiBtnStyle: 'position: absolute; z-index: 31; display: flex; align-items: center; justify-content: center; padding: 0; border: 2px solid #FFFFFF; border-radius: 999px; cursor: pointer; background: #F89624; color: #24285D; box-shadow: 0 2px 4px rgba(21,24,58,0.20), 0 12px 28px rgba(21,24,58,0.28); ' + (compact ? 'right: 8px; bottom: 8px; width: 64px; height: 64px;' : 'right: 40px; bottom: 22px; width: 64px; height: 64px;') + (s.aiPop ? ' outline: 3px solid #24285D; outline-offset: 2px;' : ''),
+      aiBtnStyle: 'position: absolute; z-index: 31; display: flex; align-items: center; justify-content: center; padding: 0; border: 2px solid #FFFFFF; border-radius: 999px; cursor: pointer; background: #F89624; color: #24285D; box-shadow: 0 2px 4px rgba(21,24,58,0.20), 0 12px 28px rgba(21,24,58,0.28); ' + (compact ? 'right: 8px; bottom: 8px; width: 64px; height: 64px;' : 'right: ' + (nv.navRailW + 32) + 'px; bottom: 22px; width: 64px; height: 64px;') + (s.aiPop ? ' outline: 3px solid #24285D; outline-offset: 2px;' : ''),
       lampSize: '32',
       toggleAi: function () { self.setState({ aiPop: !s.aiPop, srOpen: false }); },
       closeAi: function () { self.setState({ aiPop: false, aiFull: false }); },
@@ -1572,7 +1584,7 @@ class Component extends DCLogic {
       nudgeOnAttr: s.nudgeOff ? 'false' : 'true', nudgeToggle: function () { self.setState({ nudgeOff: !s.nudgeOff, nudgeHidden: {} }); },
       nudgeTrack: 'width: 36px; height: 20px; border-radius: 999px; flex-shrink: 0; position: relative; display: inline-block; ' + (s.nudgeOff ? 'background: #DADCE8;' : 'background: #24285D;'),
       nudgeKnob: 'position: absolute; top: 2px; width: 16px; height: 16px; border-radius: 999px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(21,24,58,0.3); ' + (s.nudgeOff ? 'left: 2px;' : 'left: 18px;'),
-      nudgeStyle: 'position: absolute; z-index: 31; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 12px 32px rgba(36,40,93,0.22); ' + (compact ? 'left: 12px; right: 12px; bottom: 88px;' : 'right: 40px; bottom: 100px; width: 320px;'),
+      nudgeStyle: 'position: absolute; z-index: 31; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 12px 32px rgba(36,40,93,0.22); ' + (compact ? 'left: 12px; right: 12px; bottom: 88px;' : 'right: ' + (nv.navRailW + 32) + 'px; bottom: 100px; width: 320px;'),
       nudgeTail: 'position: absolute; bottom: -7px; right: 26px; width: 12px; height: 12px; background: #FFFFFF; border-right: 1px solid #DADCE8; border-bottom: 1px solid #DADCE8; transform: rotate(45deg);',
       aiCanBrief: tab === 'reports', aiBriefing: !!s.aiBrief && tab === 'reports',
       aiBriefSub: 'Genie summarizes what stands out and checks the numbers.',
