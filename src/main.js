@@ -8,7 +8,9 @@
   var LABELS = { lo: 'Loan officer', exec: 'Lender executive', rec: 'Recruiter', ae: 'Account executive' };
   var persona = LABELS[params.get('persona')] || 'Lender executive';
   var mq = window.matchMedia('(max-width: 767px)');
-  var props = function () { return { persona: persona, allowCompare: params.get('compare') !== 'off', compact: mq.matches }; };
+  // Only decides whether the header has room for your name next to the avatar; layout still has one breakpoint.
+  var roomy = window.matchMedia('(min-width: 1180px)');
+  var props = function () { return { persona: persona, allowCompare: params.get('compare') !== 'off', compact: mq.matches, roomy: roomy.matches }; };
   var app = mountDC(Component, document.getElementById('ig-template').innerHTML, document.getElementById('app'), props);
   var patch = {};
   if (params.get('tab')) patch.tab = params.get('tab');
@@ -17,6 +19,6 @@
   if (params.get('cat')) patch.srCat = params.get('cat');
   if (Object.keys(patch).length) app.setState(patch);
   var onChange = function () { app.__schedule(); };
-  if (mq.addEventListener) mq.addEventListener('change', onChange); else mq.addListener(onChange);
+  [mq, roomy].forEach(function (m) { if (m.addEventListener) m.addEventListener('change', onChange); else m.addListener(onChange); });
   window.InGeniusApp = app;
 })();
