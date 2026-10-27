@@ -10,7 +10,7 @@ class Component extends DCLogic {
     if (prev.allowCompare !== this.props.allowCompare) this.setState({ allowCompare: this.props.allowCompare !== false });
   }
   fresh(p, allow) {
-    return { persona: p, allowCompare: allow, tab: 'home', viewId: null, chips: null, banner: null, roadUndone: false, aiPop: false, modal: null, thread: [], done: {}, acted: {}, expanded: 0, fsel: {}, log: [], hover: null, reportId: null, rFilters: [], rSort: { col: null, dir: 'asc' }, rSearch: '', rAdd: false, rEdit: null, rHoverBin: null, rBanner: null, mapSt: undefined, mapCo: undefined, mapMetric: null, mapHover: null, mapSel: null, mapShow: 'all', mapPop: null, mapNote: null, briefHow: false, aiBrief: false, flowMeasure: null, flowPeriod: null, flowFocus: null, flowHover: null, flowPop: null, flowDir: 'going', flowCohort: 'a', plView: 'board', plPri: {}, plOwn: {}, plStuck: false, plQ: '', plPop: null, plSel: null, plMoves: {}, plAdded: [], plAdd: null, plDraft: '', plColSort: {}, plBanner: null, loSearch: '', loSort: { col: null, dir: 'asc' }, homeW: null, homeEdit: false, nudgeOff: false, nudgeHidden: {}, nudgeTip: false, aiFull: false, aiDraft: '', myReports: [] };
+    return { persona: p, allowCompare: allow, tab: 'home', viewId: null, chips: null, banner: null, roadUndone: false, aiPop: false, modal: null, thread: [], done: {}, acted: {}, expanded: 0, fsel: {}, log: [], hover: null, reportId: null, rFilters: [], rSort: { col: null, dir: 'asc' }, rSearch: '', rAdd: false, rEdit: null, rHoverBin: null, rBanner: null, mapSt: undefined, mapCo: undefined, mapMetric: null, mapHover: null, mapSel: null, mapShow: 'all', mapPop: null, mapNote: null, briefHow: false, aiBrief: false, flowMeasure: null, flowPeriod: null, flowFocus: null, flowHover: null, flowPop: null, flowDir: 'going', flowCohort: 'a', plView: 'board', plPri: {}, plOwn: {}, plStuck: false, plQ: '', plPop: null, plSel: null, plMoves: {}, plAdded: [], plAdd: null, plDraft: '', plColSort: {}, plBanner: null, loSearch: '', loSort: { col: null, dir: 'asc' }, srQ: '', srOpen: false, srOnly: null, srAct: -1, srCat: 'lo', srF: {}, srAi: {}, srSort: {}, srLimit: SEARCH_PAGE, srPop: null, srSel: null, srActed: {}, srRecent: [], srBanner: null, homeW: null, homeEdit: false, nudgeOff: false, nudgeHidden: {}, nudgeTip: false, aiFull: false, aiDraft: '', myReports: [] };
   }
   data() { return PERSONAS[this.state.persona]; }
   prompts() {
@@ -1034,6 +1034,231 @@ class Component extends DCLogic {
       rFoot: foot
     });
   }
+  // Global search: the header box with its quick dropdown, and the advanced search page for one category.
+  searchGo(patch) {
+    var s = this.state, q = patch.srQ != null ? patch.srQ : s.srQ, recent = s.srRecent || [];
+    if (q && q.trim()) recent = [q.trim()].concat(recent.filter(function (r) { return r.toLowerCase() !== q.trim().toLowerCase(); })).slice(0, 5);
+    this.setState(Object.assign({ tab: 'search', srOpen: false, srAct: -1, srLimit: SEARCH_PAGE, srPop: null, srSel: null, srRecent: recent, aiPop: false, homeEdit: false, modal: null }, patch));
+    if (patch.srSel && typeof document !== 'undefined') setTimeout(function () { var el = document.getElementById('sr-row-' + patch.srSel); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'center' }); }, 80);
+  }
+  focusSearch() {
+    if (typeof document === 'undefined') return;
+    setTimeout(function () { var el = document.getElementById('ig-search') || document.getElementById('ig-search-page'); if (el) el.focus(); }, 40);
+  }
+  searchVals(compact) {
+    var self = this, s = this.state, d = this.data(), persona = s.persona, tab = s.tab;
+    var q = s.srQ || '', hasQ = !!q.trim(), onPage = tab === 'search';
+    var gated = persona === 'lo' && !s.allowCompare;
+    var actLabel = function (c) {
+      if (c.id === 'lo') return persona === 'rec' || persona === 'exec' ? 'Add to recruits' : persona === 'ae' ? 'Add to deals' : 'Save contact';
+      if (c.id === 'lender') return persona === 'ae' ? 'Add to deals' : 'Save company';
+      if (c.id === 'agent') return persona === 'lo' ? 'Add to deals' : 'Save contact';
+      return c.id === 'property' ? 'Save property' : 'Save company';
+    };
+    var avatar = function (c) { return 'width: 36px; height: 36px; flex-shrink: 0; border-radius: ' + (c.person ? '999px' : '10px') + '; display: flex; align-items: center; justify-content: center; font-family: Montserrat, sans-serif; font-size: 12px; font-weight: 700; ' + (c.person ? 'background: #24285D; color: #FFFFFF;' : 'background: #F4F5F9; color: #24285D; border: 1px solid #DADCE8;'); };
+    var kinds = function (c) { return { isPerson: !!c.person, isLender: c.id === 'lender', isOffice: c.id === 'office', isTitle: c.id === 'title', isProperty: c.id === 'property' }; };
+
+    // Header dropdown: a few rows per category, or more of one when it is toggled to a single category.
+    var groups = [], flat = [];
+    if (hasQ && !onPage) {
+      quickSearch(persona, q, s.srOnly).forEach(function (g) {
+        if (!g.total && !s.srOnly) return;
+        var rows = g.rows.map(function (x) {
+          var idx = flat.length, on = idx === s.srAct;
+          var it = { name: x.name, sub: g.cat.sub(x), metric: gated && g.cat.id === 'lo' ? 'Production hidden by your org' : g.cat.metric(x), initials: initials(x.name).toUpperCase(), id: 'sr-opt-' + x.id,
+            selected: on ? 'true' : 'false',
+            style: FONT + 'display: flex; align-items: center; gap: 12px; width: 100%; box-sizing: border-box; padding: 8px 10px; border: none; border-radius: 10px; text-align: left; cursor: pointer; color: #24285D; ' + (on ? 'background: #F4F5F9; box-shadow: inset 3px 0 0 #F89624;' : 'background: transparent;'),
+            hover: function () { if (self.state.srAct !== idx) self.setState({ srAct: idx }); },
+            open: function () { self.searchGo({ srCat: g.cat.id, srSel: x.id }); } };
+          flat.push(it);
+          return it;
+        });
+        groups.push(Object.assign(kinds(g.cat), { catId: g.cat.id, label: g.cat.label, total: g.total, totalText: g.total === 1 ? '1 match' : g.total + ' matches', rows: rows, avatar: avatar(g.cat), empty: !g.total,
+          seeAllLabel: 'See all ' + g.total, hasMore: g.total > g.rows.length, seeAll: function () { self.searchGo({ srCat: g.cat.id }); } }));
+      });
+    }
+    var anyHits = groups.some(function (g) { return g.total > 0; });
+    var advanced = function () {
+      var hit = groups.filter(function (g) { return g.total; })[0], first = s.srOnly || (hit ? hit.catId : s.srCat || 'lo');
+      self.searchGo({ srCat: first });
+    };
+    var onlyCat = s.srOnly ? searchCat(s.srOnly) : null;
+    var chipStyle = function (on) { return FONT + 'flex-shrink: 0; height: 30px; padding: 0 12px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; ' + (on ? 'border: 1px solid #24285D; background: #24285D; color: #FFFFFF;' : 'border: 1px solid #DADCE8; background: #FFFFFF; color: #24285D;'); };
+    var chips = [{ id: null, label: 'All' }].concat(SEARCH_CATS.map(function (c) { return { id: c.id, label: compact ? c.short : c.label }; })).map(function (c) {
+      var on = (s.srOnly || null) === c.id;
+      return { label: c.label, pressed: on ? 'true' : 'false', style: chipStyle(on), pick: function () { self.setState({ srOnly: c.id, srAct: -1, srOpen: true }); self.focusSearch(); } };
+    });
+
+    // Advanced page: one category, its own filters and sorts, paged.
+    var cat = searchCat(s.srCat || 'lo'), cf = (s.srF || {})[cat.id] || {}, aiKeys = (s.srAi || {})[cat.id] || {};
+    var sortId = (s.srSort || {})[cat.id] || 'best';
+    var res = onPage ? advancedSearch(persona, cat.id, q, cf, sortId, s.srLimit || SEARCH_PAGE) : { total: 0, rows: [] };
+    var setF = function (k, v, extra) {
+      var all = Object.assign({}, s.srF), mine = Object.assign({}, cf), ai = Object.assign({}, s.srAi), myAi = Object.assign({}, aiKeys);
+      if (v == null || (Array.isArray(v) && !v.length)) delete mine[k]; else mine[k] = v;
+      delete myAi[k]; all[cat.id] = mine; ai[cat.id] = myAi;
+      self.setState(Object.assign({ srF: all, srAi: ai, srLimit: SEARCH_PAGE, srBanner: null }, extra || {}));
+    };
+    var filterCount = Object.keys(cf).length;
+    var pop = s.srPop;
+    var pills = cat.filters.map(function (f) {
+      var v = cf[f.k], on = v != null && !(Array.isArray(v) && !v.length), locked = gated && f.gated, isAi = on && !!aiKeys[f.k];
+      var val = !on ? '' : f.t === 'min' ? v + '+' : v.length > 2 ? v[0] + ' +' + (v.length - 1) : v.join(', ');
+      return { label: f.l, val: val, on: on, off: !on, ai: isAi, locked: locked, open: pop === f.k ? 'true' : 'false',
+        title: locked ? 'Hidden by your org’s settings' : '',
+        style: FONT + 'height: 32px; display: flex; align-items: center; gap: 6px; padding: 0 10px 0 12px; border-radius: 8px; font-size: 13px; cursor: ' + (locked ? 'not-allowed' : 'pointer') + '; white-space: nowrap; box-sizing: border-box; ' +
+          (locked ? 'border: 1px dashed #DADCE8; background: #F4F5F9; color: #8286A8;' : isAi ? 'border: 1px solid #F89624; background: #F4F5F9; color: #24285D;' : on ? 'border: 1px solid #24285D; background: #FFFFFF; color: #24285D; box-shadow: inset 0 0 0 1px #24285D;' : 'border: 1px solid #DADCE8; background: #FFFFFF; color: #474945;'),
+        toggle: function () { if (!locked) self.setState({ srPop: pop === f.k ? null : f.k }); },
+        clear: function () { setF(f.k, null, { srPop: null }); } };
+    });
+    var pf = cat.filters.filter(function (f) { return f.k === pop; })[0];
+    var popOpts = !pf ? [] : (pf.t === 'min' ? [null].concat(pf.opts) : searchOptions(persona, cat, pf)).map(function (o) {
+      var cur = cf[pf.k], on = pf.t === 'min' ? (cur == null ? o == null : cur === o) : !!(cur && cur.indexOf(o) >= 0);
+      return { label: pf.t === 'min' ? (o == null ? 'Any' : o + ' or more') : o, on: on, checked: on ? 'true' : 'false', radio: pf.t === 'min', check: pf.t !== 'min',
+        box: 'width: 16px; height: 16px; flex-shrink: 0; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border-radius: ' + (pf.t === 'min' ? '999px' : '4px') + '; ' + (on ? 'background: #24285D; border: 1px solid #24285D; color: #FFFFFF;' : 'background: #FFFFFF; border: 1px solid #8286A8;'),
+        pick: function () {
+          if (pf.t === 'min') { setF(pf.k, o); return; }
+          var list = (cur || []).slice(), at = list.indexOf(o);
+          if (at >= 0) list.splice(at, 1); else list.push(o);
+          setF(pf.k, list);
+        } };
+    });
+    var sorts = [{ id: 'best', l: hasQ ? 'Best match' : 'Default' }].concat(cat.sorts.filter(function (o) { return !(gated && o.gated); }).map(function (o) { return { id: o.id || o.k, l: o.l }; }));
+    var sortOn = sorts.filter(function (o) { return o.id === sortId; })[0] || sorts[0];
+    var lower = cat.label.toLowerCase();
+    var rows = res.rows.map(function (x) {
+      var sel = s.srSel === x.id, acted = (s.srActed || {})[x.id] || {};
+      var act = function (label) { return function () { var a = Object.assign({}, s.srActed), m = Object.assign({}, acted); m[label] = true; a[x.id] = m; self.setState({ srActed: a, log: self.addLog(label + ': ' + x.name) }); }; };
+      var primary = actLabel(cat);
+      var cells = cat.cols.map(function (c) {
+        var hide = gated && c.gated, v = x[c.k];
+        return { label: c.l, text: hide ? 'Hidden' : searchFmt(v, c.f), hidden: hide, textStyle: hide ? 'color: #8286A8; font-style: italic;' : '', isTag: !hide && c.f === 'tag', plain: hide || c.f !== 'tag', tone: SEARCH_TONE[v] || 'neutral',
+          title: hide ? 'Hidden by your org’s settings' : '' };
+      });
+      var detail = cat.detail.map(function (dd) { var hide = gated && dd[3]; return { label: dd[1], text: hide ? 'Hidden by your org’s settings' : searchFmt(x[dd[0]], dd[2]) }; });
+      var links = (cat.links || []).map(function (L) {
+        return { label: L.label(x), go: function () {
+          var all = Object.assign({}, s.srF); all[L.to] = {};
+          if (L.by) {
+            var t = DIRECTORY.filter(function (y) { return y.cat === L.to && y.name === x[L.by]; })[0];
+            self.searchGo({ srCat: L.to, srQ: x[L.by], srF: all, srSel: t ? t.id : null });
+          } else self.searchGo({ srCat: L.to, srQ: L.q(x), srF: all });
+        } };
+      });
+      return Object.assign(kinds(cat), { id: 'sr-row-' + x.id, name: x.name, sub: cat.sub(x), initials: initials(x.name).toUpperCase(), cells: cells, detail: detail, links: links, hasLinks: links.length > 0,
+        open: sel, expanded: sel ? 'true' : 'false',
+        toggle: function () { self.setState({ srSel: sel ? null : x.id }); },
+        actLabel: acted[primary] ? 'Added · synced to CRM' : primary, actDone: !!acted[primary], act: act(primary),
+        actStyle: FONT + 'height: 34px; padding: 0 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; ' + (acted[primary] ? 'border: 1px solid #DADCE8; background: #FFFFFF; color: #1D7A55;' : 'border: 1px solid #24285D; background: #24285D; color: #FFFFFF;'),
+        remindLabel: acted.remind ? 'Reminder set for tomorrow' : 'Set a reminder', remind: function () { var a = Object.assign({}, s.srActed), m = Object.assign({}, acted); m.remind = true; a[x.id] = m; self.setState({ srActed: a, log: self.addLog('Reminder set: ' + x.name) }); },
+        touchLabel: acted.touch ? 'Touch logged · synced' : 'Log a touch', touch: function () { var a = Object.assign({}, s.srActed), m = Object.assign({}, acted); m.touch = true; a[x.id] = m; self.setState({ srActed: a, log: self.addLog('Touch logged: ' + x.name) }); },
+        rowStyle: 'border-top: 1px solid #DADCE8; ' + (sel ? 'background: #F4F5F9;' : ''),
+        mainStyle: 'box-sizing: border-box; ' + (compact ? 'display: flex; flex-direction: column; gap: 8px; padding: 12px 0;' : 'display: grid; grid-template-columns: minmax(0, 2.4fr) repeat(4, minmax(0, 1fr)) 170px; gap: 16px; align-items: center; padding: 10px 12px;'),
+        avatar: avatar(cat) });
+    });
+    var others = !onPage || res.total ? [] : SEARCH_CATS.filter(function (c) { return c.id !== cat.id; }).map(function (c) { return { c: c, n: searchMatches(persona, c.id, q).length }; }).filter(function (o) { return o.n; }).map(function (o) {
+      return { label: o.c.label + ' (' + o.n + ')', go: function () { self.searchGo({ srCat: o.c.id }); } };
+    });
+    var tabs = SEARCH_CATS.map(function (c) {
+      var on = c.id === cat.id, n = onPage ? searchMatches(persona, c.id, q).length : 0;
+      return { label: compact ? c.short : c.label, count: n, pressed: on ? 'true' : 'false',
+        style: FONT + 'height: 32px; display: flex; align-items: center; gap: 6px; padding: 0 10px 0 12px; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; ' + (on ? 'background: #24285D; color: #FFFFFF;' : 'background: transparent; color: #474945;'),
+        countStyle: 'min-width: 20px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 999px; font-size: 11px; line-height: 18px; text-align: center; ' + (on ? 'background: #F89624; color: #24285D;' : 'background: #F4F5F9; color: #474945;'),
+        pick: function () { self.setState({ srCat: c.id, srSel: null, srPop: null, srLimit: SEARCH_PAGE, srBanner: null }); } };
+    });
+    var banner = s.srBanner && s.srBanner.cat === cat.id ? s.srBanner : null;
+    var panelOpen = !!s.srOpen && !onPage;
+    var boxOpen = !compact || panelOpen;
+
+    return {
+      isSearch: onPage,
+      srQ: q, srHasQ: hasQ, srEmptyQ: !hasQ,
+      srShowIcon: compact && !panelOpen && !onPage, srShowBox: boxOpen && !(compact && onPage), srBack: compact,
+      srOpenIcon: function () { self.setState({ srOpen: true, srAct: -1, homeEdit: false }); self.focusSearch(); },
+      srClose: function () { self.setState({ srOpen: false, srAct: -1 }); },
+      srExpanded: panelOpen ? 'true' : 'false',
+      srActive: s.srAct >= 0 && flat[s.srAct] ? flat[s.srAct].id : '',
+      srPlaceholder: onlyCat ? 'Search ' + onlyCat.label.toLowerCase() : compact ? 'Search people, companies, homes' : 'Search loan officers, lenders, agents, offices, title, properties',
+      srOnInput: function (e) { var v = e && e.target ? e.target.value : ''; self.setState({ srQ: v, srOpen: true, srAct: -1, srLimit: SEARCH_PAGE, srSel: null }); },
+      srOnClick: function () { if (!self.state.srOpen) self.setState({ srOpen: true }); },
+      srOnKey: function (e) {
+        var k = e && e.key;
+        if (k === 'Escape') { self.setState({ srOpen: false, srAct: -1 }); return; }
+        if (onPage) { if (k === 'Enter' && e.preventDefault) e.preventDefault(); return; }
+        if (k === 'ArrowDown' || k === 'ArrowUp') {
+          if (e.preventDefault) e.preventDefault();
+          var n = flat.length, i = s.srAct == null ? -1 : s.srAct;
+          i = k === 'ArrowDown' ? (i + 1) % Math.max(1, n) : (i <= 0 ? n - 1 : i - 1);
+          self.setState({ srOpen: true, srAct: n ? i : -1 });
+          return;
+        }
+        if (k === 'Enter') {
+          if (e.preventDefault) e.preventDefault();
+          if (s.srAct >= 0 && flat[s.srAct]) flat[s.srAct].open(); else if (hasQ) advanced();
+        }
+      },
+      srClear: function () { self.setState({ srQ: '', srAct: -1, srSel: null, srLimit: SEARCH_PAGE }); self.focusSearch(); },
+      srHasOnly: !!onlyCat, srOnlyLabel: onlyCat ? onlyCat.short : '',
+      srOnlyClear: function () { self.setState({ srOnly: null, srAct: -1 }); self.focusSearch(); },
+      srPanelOpen: panelOpen,
+      srBackdrop: panelOpen && !compact,
+      srWrapStyle: compact && panelOpen
+        ? 'position: fixed; z-index: 60; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box; padding: 8px 12px 12px; background: #FFFFFF;'
+        : 'position: relative; flex: 1 1 360px; min-width: 160px; max-width: 560px;',
+      srBarStyle: 'display: flex; align-items: center; gap: 8px; ' + (compact ? '' : ''),
+      srBoxStyle: FONT + 'flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 6px 0 14px; box-sizing: border-box; border-radius: 999px; cursor: text; ' + (panelOpen ? 'border: 1px solid #24285D; background: #FFFFFF; box-shadow: 0 0 0 3px rgba(36,40,93,0.10);' : 'border: 1px solid #DADCE8; background: #F4F5F9;'),
+      srPanelStyle: compact
+        ? 'flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-top: 4px;'
+        : 'position: absolute; z-index: 25; top: 48px; left: 0; width: 640px; max-width: calc(100vw - 300px); min-width: 100%; max-height: calc(100vh - 120px); overflow-y: auto; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 16px 40px rgba(36,40,93,0.20);',
+      srChipRow: 'display: flex; gap: 6px; ' + (compact ? 'overflow-x: auto; padding-bottom: 2px;' : 'flex-wrap: wrap;'),
+      srChips: chips,
+      srRecent: (s.srRecent || []).map(function (r) { return { label: r, go: function () { self.setState({ srQ: r, srOpen: true, srAct: -1 }); self.focusSearch(); } }; }),
+      srHasRecent: !hasQ && (s.srRecent || []).length > 0,
+      srHint: 'Search ' + (onlyCat ? onlyCat.label.toLowerCase() : 'loan officers, lenders, agents, offices, title agencies and properties') + ' in ' + d.territory + '. Try a name, company, NMLS ID, ZIP or street.',
+      srGroups: groups, srNoHits: hasQ && !anyHits,
+      srNoHitsText: 'No ' + (onlyCat ? onlyCat.label.toLowerCase() : 'matches') + ' for “' + q.trim() + '” in ' + d.territory + '.',
+      srCanWiden: !!onlyCat && hasQ && !anyHits,
+      srWiden: function () { self.setState({ srOnly: null, srAct: -1 }); self.focusSearch(); },
+      srFootText: hasQ ? (onlyCat ? 'Top ' + SEARCH_QUICK_ONE + ' ' + onlyCat.label.toLowerCase() : 'Top ' + SEARCH_QUICK + ' per category') + ' · ' + d.territory : 'Scoped to ' + d.territory,
+      srAdvanced: function () { if (hasQ) advanced(); else self.searchGo({ srCat: s.srOnly || s.srCat || 'lo' }); },
+      srAdvLabel: onlyCat ? 'Advanced ' + onlyCat.short.toLowerCase() + ' search' : 'Advanced search',
+
+      srTabs: tabs,
+      srTabsStyle: 'display: flex; gap: 2px; padding: 3px; background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 10px; box-sizing: border-box; min-width: 0; overflow-x: auto; ' + (compact ? 'width: 100%;' : 'align-self: flex-start; max-width: 100%;'),
+      srPageInput: compact,
+      srCountLine: res.total.toLocaleString('en-US') + ' ' + (res.total === 1 ? cat.one : lower) + (hasQ ? ' match “' + q.trim() + '”' : '') + ' in ' + d.territory,
+      srPills: pills, srHasFilters: filterCount > 0, srResetF: function () { var all = Object.assign({}, s.srF), ai = Object.assign({}, s.srAi); all[cat.id] = {}; ai[cat.id] = {}; self.setState({ srF: all, srAi: ai, srPop: null, srBanner: null, srLimit: SEARCH_PAGE }); },
+      srPopOpen: !!pf, srPopTitle: pf ? pf.l : '', srPopOpts: popOpts, srPopClose: function () { self.setState({ srPop: null }); },
+      srPopClear: function () { if (pf) setF(pf.k, null, { srPop: null }); },
+      srPopStyle: 'position: absolute; z-index: 12; top: 40px; left: 0; width: ' + (compact ? '100%' : '300px') + '; max-height: 360px; overflow-y: auto; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 2px; box-shadow: 0 8px 24px rgba(36,40,93,0.16);',
+      srSortLabel: sortOn.l, srSortOpen: pop === '_sort' ? 'true' : 'false', srSortPop: pop === '_sort',
+      srSortToggle: function () { self.setState({ srPop: pop === '_sort' ? null : '_sort' }); },
+      srSorts: sorts.map(function (o) { var on = o.id === sortOn.id; return { label: o.l, on: on, checked: on ? 'true' : 'false',
+        style: FONT + 'height: 32px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 8px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; text-align: left; color: #24285D; ' + (on ? 'background: #F4F5F9; font-weight: 600;' : 'background: transparent;'),
+        pick: function () { var all = Object.assign({}, s.srSort); all[cat.id] = o.id; self.setState({ srSort: all, srPop: null, srLimit: SEARCH_PAGE }); } }; }),
+      srSortPopStyle: 'position: absolute; z-index: 12; top: 40px; ' + (compact ? 'left: 0; width: 100%;' : 'right: 0; width: 240px;') + ' box-sizing: border-box; background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 2px; box-shadow: 0 8px 24px rgba(36,40,93,0.16);',
+      srGenieQ: cat.genie ? cat.genie.q : '', srHasGenie: !!cat.genie,
+      srGenieRun: function () {
+        var g = cat.genie, all = Object.assign({}, s.srF), ai = Object.assign({}, s.srAi), keys = {};
+        all[cat.id] = JSON.parse(JSON.stringify(g.f)); Object.keys(g.f).forEach(function (k) { keys[k] = true; }); ai[cat.id] = keys;
+        self.setState({ srF: all, srAi: ai, srPop: null, srLimit: SEARCH_PAGE, srBanner: { cat: cat.id, did: g.did, prev: cf, prevAi: aiKeys } });
+      },
+      srHasBanner: !!banner, srBannerText: banner ? 'Genie set ' + Object.keys(cat.genie.f).length + (Object.keys(cat.genie.f).length === 1 ? ' filter' : ' filters') + '. ' + banner.did + '.' : '',
+      srUndo: function () { var all = Object.assign({}, s.srF), ai = Object.assign({}, s.srAi); all[cat.id] = banner.prev; ai[cat.id] = banner.prevAi; self.setState({ srF: all, srAi: ai, srBanner: null }); },
+      srGated: gated && cat.id === 'lo', srGatedText: 'Your org hides other loan officers’ production, so those columns, filters and sorts are off.',
+      srHead: cat.cols.map(function (c) { return c.l; }), srHeadStyle: 'display: grid; grid-template-columns: minmax(0, 2.4fr) repeat(4, minmax(0, 1fr)) 170px; gap: 16px; padding: 10px 12px; font-size: 12px; line-height: 16px; font-weight: 600; color: #474945; text-transform: uppercase; letter-spacing: 0.04em;',
+      srNameLabel: cat.one.replace(/^./, function (ch) { return ch.toUpperCase(); }),
+      srRows: rows, srHasRows: rows.length > 0, srNoRows: onPage && !rows.length,
+      srNoRowsText: 'No ' + lower + ' match' + (hasQ ? ' “' + q.trim() + '”' : '') + (filterCount ? ' with these filters' : '') + ' in ' + d.territory + '.',
+      srOthers: others, srHasOthers: others.length > 0,
+      srMore: res.total > rows.length, srMoreLabel: 'Show ' + Math.min(SEARCH_PAGE, res.total - rows.length) + ' more',
+      srShowMore: function () { self.setState({ srLimit: (s.srLimit || SEARCH_PAGE) + SEARCH_PAGE }); },
+      srShowing: 'Showing ' + rows.length + ' of ' + res.total.toLocaleString('en-US'),
+      srActCell: 'display: flex; ' + (compact ? 'padding-left: 48px;' : 'justify-content: flex-end;'),
+      srDetailGrid: 'display: grid; gap: 12px 24px; ' + (compact ? 'grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 4px 0 14px;' : 'grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 4px 12px 16px 60px;'),
+      srActionsRow: 'display: flex; flex-wrap: wrap; align-items: center; gap: 8px; ' + (compact ? 'padding: 0 0 14px;' : 'padding: 0 12px 16px 60px;')
+    };
+  }
   renderVals() {
     var self = this, s = this.state, d = this.data(), x = EXTRA[s.persona];
     var compact = !!this.props.compact;
@@ -1118,10 +1343,10 @@ class Component extends DCLogic {
         hasBadge: m.id === 'actions' && remaining > 0,
         // Phone: the count sits as a small badge on the icon's top right corner.
         badgeStyle: 'box-sizing: border-box; border-radius: 999px; background: #F89624; color: #24285D; font-weight: 700; text-align: center; ' + (compact ? 'position: absolute; top: 3px; left: calc(50% + 3px); min-width: 17px; height: 17px; padding: 0 4px; font-size: 10px; line-height: 15px; border: 1px solid ' + (on ? '#FFFFFF' : '#24285D') + ';' : 'min-width: 20px; height: 20px; padding: 0 6px; font-size: 11px; line-height: 20px;'),
-        go: function () { self.setState({ tab: m.id, aiPop: false }); },
+        go: function () { self.setState({ tab: m.id, aiPop: false, srOpen: false }); },
         style: FONT + 'display: flex; align-items: center; justify-content: center; gap: ' + (compact ? '2px; position: relative; flex-direction: column; flex: 1 1 0; min-height: 52px; padding: 4px 2px; font-size: 11px; border-radius: 12px;' : '8px; min-height: 44px; padding: 0 16px; font-size: 14px; border-radius: 999px;') + ' border: none; font-weight: 600; cursor: pointer; white-space: nowrap; ' + (on ? 'background: #FFFFFF; color: #24285D;' : 'background: transparent; color: #EEF0F8;') };
     });
-    var titles = { home: 'Home', explore: 'Explore', actions: 'Action items', reports: 'Reports', crm: d.crmTitle };
+    var titles = { home: 'Home', explore: 'Explore', actions: 'Action items', reports: 'Reports', crm: d.crmTitle, search: 'Search' };
     var cardR = '16px';
     var cardStyle = 'background: #FFFFFF; border: 1px solid #DADCE8; border-radius: ' + cardR + '; display: flex; flex-direction: column; min-width: 0; box-sizing: border-box; ' + (compact ? 'padding: 16px; gap: 12px;' : 'padding: 20px 24px; gap: 14px;');
     var aiLast = s.thread.length ? s.thread[s.thread.length - 1] : { q: '', did: [], a: '' };
@@ -1134,11 +1359,12 @@ class Component extends DCLogic {
       }) };
     });
 
-    return Object.assign(this.reportVals(compact), this.pipeVals(compact), this.homeVals(compact), {
+    return Object.assign(this.reportVals(compact), this.pipeVals(compact), this.homeVals(compact), this.searchVals(compact), {
       d: dd, compact: compact, wide: !compact,
       rootStyle: VARS + FONT + 'position: relative; overflow: hidden; display: flex; flex-direction: column; background: #EEF0F6; color: #24285D; ' + 'width: 100%; height: 100%;',
-      headerStyle: 'position: relative; z-index: 20; flex-shrink: 0; display: flex; align-items: center; box-sizing: border-box; ' + (compact ? 'gap: 10px; min-height: 56px; padding: 8px 16px;' : 'gap: 16px; min-height: 64px; padding: 12px 40px; margin-bottom: 16px;') + ' background: #FFFFFF; border-bottom: 1px solid #DADCE8; box-shadow: 0 1px 3px rgba(36,40,93,0.06);',
-      logoStyle: 'display: block; flex-shrink: 0; ' + (compact ? 'width: 26px; height: 34px;' : 'width: 28px; height: 36px;'),
+      headerStyle: 'position: relative; z-index: ' + (compact && s.srOpen && tab !== 'search' ? '60' : '20') + '; flex-shrink: 0; display: flex; align-items: center; box-sizing: border-box; ' + (compact ? 'gap: 10px; min-height: 56px; padding: 8px 16px;' : 'gap: 16px; min-height: 64px; padding: 12px 40px; margin-bottom: 16px;') + ' background: #FFFFFF; border-bottom: 1px solid #DADCE8; box-shadow: 0 1px 3px rgba(36,40,93,0.06);',
+      hdrSpacer: 'flex-grow: 1; ' + (compact ? 'order: -1;' : ''),
+      logoStyle: 'display: block; flex-shrink: 0; ' + (compact ? 'order: -2; width: 26px; height: 34px;' : 'width: 28px; height: 36px;'),
       pageTitle: titles[tab],
       mainStyle: 'flex-grow: 1; min-height: 0; overflow-y: auto; box-sizing: border-box; ' + (compact ? 'padding: 20px 16px 96px;' : 'padding: 8px 40px 120px;'),
       // Desktop: Action items floats right and the other widgets wrap around it, going full width once they pass its bottom.
@@ -1181,7 +1407,7 @@ class Component extends DCLogic {
       aiExpanded: s.aiPop ? 'true' : 'false',
       aiBtnStyle: 'position: absolute; z-index: 31; display: flex; align-items: center; justify-content: center; padding: 0; border: 2px solid #FFFFFF; border-radius: 999px; cursor: pointer; background: #F89624; color: #24285D; box-shadow: 0 2px 4px rgba(21,24,58,0.20), 0 12px 28px rgba(21,24,58,0.28); ' + (compact ? 'right: 8px; bottom: 8px; width: 64px; height: 64px;' : 'right: 40px; bottom: 22px; width: 64px; height: 64px;') + (s.aiPop ? ' outline: 3px solid #24285D; outline-offset: 2px;' : ''),
       lampSize: '32',
-      toggleAi: function () { self.setState({ aiPop: !s.aiPop }); },
+      toggleAi: function () { self.setState({ aiPop: !s.aiPop, srOpen: false }); },
       closeAi: function () { self.setState({ aiPop: false, aiFull: false }); },
       aiPopOpen: s.aiPop,
       aiPopStyle: s.aiFull

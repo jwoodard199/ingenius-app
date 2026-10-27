@@ -1,6 +1,6 @@
 # InGenius web app (prototype)
 
-This is a responsive web prototype of InGenius, running on sample data. It has four persona views: loan officer, lender executive, recruiter, and account executive. It includes a Home page with widgets you can pick, Action items, a Kanban pipeline board (deals for loan officers and account executives, recruits for executives and recruiters), Reports dashboards, census-tract heat maps, Sankey charts for loan officer movement (Coming or Going) and loan retention, and the Genie AI assistant with briefings.
+This is a responsive web prototype of InGenius, running on sample data. It has four persona views: loan officer, lender executive, recruiter, and account executive. It includes a Home page with widgets you can pick, Action items, a Kanban pipeline board (deals for loan officers and account executives, recruits for executives and recruiters), Reports dashboards, census-tract heat maps, Sankey charts for loan officer movement (Coming or Going) and loan retention, the Genie AI assistant with briefings, and global search across loan officers, lenders, real estate agents, real estate offices, title agencies and properties.
 
 It is plain HTML, CSS, and JavaScript. There is no build step and nothing to install.
 
@@ -28,6 +28,8 @@ npm test             # headless smoke test across every persona, tab and report
   - `index.html?persona=rec&tab=crm` opens the recruiter's board.
 - **Genie:** the lamp button at the bottom right opens Genie. On a report, a bubble offers "I can summarize this for you!" with a Summarize button and a bell. Summarize opens the briefing in Genie. The bell (hover: "Turn off Summary Notifications") stops the bubble everywhere, and the Summary notifications switch in the Genie panel turns it back on. Genie opens as a pop-up modal over a dimmed page, and its expand button makes it a full-screen chat on desktop and phone. When Genie builds a report from a question, it is saved to Reports as a custom report (marked ✦), with Genie’s filters applied. Briefings live only in Genie; each report shows a report panel beside its chart instead.
   - `index.html?persona=lo&tab=reports&report=retain` opens the LO's loan retention Sankey.
+- **Global search:** the search box in the header searches every category at once and returns a few results per category (top 3, with each category's total), so it stays fast. The chips at the top of the dropdown toggle it to one category (top 6). Arrow keys move through results and Enter opens one, or opens advanced search. "See all" and "Advanced search" open the advanced search page for one category, with that category's own filters (for example Tenure and Signal for loan officers, Status, Price and Beds for properties), sorts, a Genie filter suggestion, and paging. Rows expand to details with CRM actions (add to pipeline, set a reminder, log a touch) and links between companies and their people. Search is always scoped to the persona's territory. On a phone, the search icon opens search full screen.
+  - `index.html?persona=lo&tab=search&cat=property` opens advanced property search. `q=` adds a query, and `cat` is `lo`, `lender`, `agent`, `office`, `title`, or `property`.
 - **Below 768px** the same page switches to the phone layout. It is a breakpoint, not a separate app.
 
 ## Layout
@@ -46,6 +48,8 @@ npm test             # headless smoke test across every persona, tab and report
 | `src/lib/flow.js` | LO movement sample moves and movement briefings |
 | `src/lib/sankey.js` | Multi-column Sankey layout, loan retention sample data (`RETAIN`) and retention briefings |
 | `src/data/pipeline.js` | **Sample data:** pipeline deals and recruits per persona, stages, team, and Home widget defaults |
+| `src/data/directory.js` | **Sample data:** the search directory (loan officers, lenders, agents, offices, title agencies, properties), each persona's territory, and what each category shows and filters by (`SEARCH_CATS`) |
+| `src/lib/search.js` | Global search: matching and ranking, quick results per category, advanced search filters, sorts and paging |
 | `src/ui/styles.css` | Base styles plus the InGenius design-system component classes |
 | `src/ui/style-tokens.js` | Shared inline style tokens (navy `#24285D`, orange `#F89624`, fonts) |
 | `assets/data/ig-geo.js` | Pre-projected SVG boundaries: US states, all counties, TX and AZ census tracts |
@@ -57,6 +61,7 @@ npm test             # headless smoke test across every persona, tab and report
 Every screen reads plain JavaScript objects, so moving to an API means changing what fills those objects. The rendering code stays the same.
 
 - **Reports:** each entry in `REPORTS` is `{ id, label, desc, cols, data, ai }`. The `cols` describe the columns (`t` is the type: text, num, money, pct, pts, yrs, days, or trend). The `data` is the rows. The `ai` entries are the Genie suggestion pills and the filters they apply.
+- **Search:** `quickSearch(persona, q, only)` and `advancedSearch(persona, cat, q, filters, sort, limit)` in `src/lib/search.js` stand in for a search API. Point them at an endpoint that takes the query, category, territory and a limit, and returns the rows plus a total count. The record fields each category uses are listed in `SEARCH_CATS` in `src/data/directory.js`.
 - **Heat map tables:** `mapTables()` in `src/lib/map.js` returns sample lenders and brokers, then loan officers, for the area on screen. Replace it with HMDA lender aggregates and NMLS loan officer data for that GEOID.
 - **Heat map:** `mapValue()` in `src/lib/map.js` returns a sample value for each area. Replace it with a lookup by GEOID, using ACS 5-year estimates or HMDA aggregates.
 - **LO movement:** `flowMoves()` in `src/lib/flow.js` returns `{ name, from, to, m, units, tenure, window }` records. In production these come from NMLS license changes.

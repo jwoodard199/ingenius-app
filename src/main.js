@@ -1,6 +1,7 @@
 // Boots the app. Optional URL parameters let you jump straight to a sample view, for example:
 //   index.html?persona=exec&tab=reports&report=flow
-//   persona: lo | exec | rec | ae      tab: home | explore | actions | reports | crm (pipeline board)
+//   persona: lo | exec | rec | ae      tab: home | explore | actions | reports | crm (pipeline board) | search (advanced search)
+//   q: a search query      cat: lo | lender | agent | office | title | property (search category)
 //   report: map | flow | any report id in src/data/reports.js
 (function () {
   var params = new URLSearchParams(window.location.search);
@@ -12,6 +13,8 @@
   var patch = {};
   if (params.get('tab')) patch.tab = params.get('tab');
   if (params.get('report')) patch.reportId = params.get('report');
+  if (params.get('q')) patch.srQ = params.get('q');
+  if (params.get('cat')) patch.srCat = params.get('cat');
   if (Object.keys(patch).length) app.setState(patch);
   var onChange = function () { app.__schedule(); };
   if (mq.addEventListener) mq.addEventListener('change', onChange); else mq.addListener(onChange);
