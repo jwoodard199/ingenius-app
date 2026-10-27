@@ -1,9 +1,38 @@
+// Main menu settings: where the menu sits, item order, hidden items, icon-only labels and how many fit on the phone bar.
+// Saved in this browser only; in production they would live on the user's profile.
+var NAV_KEY = 'ingenius.menu';
+var NAV_IDS = ['home', 'explore', 'actions', 'reports', 'crm'];
+// Desktop only: a bar docked under the header, or a rail docked to the right edge. Phones always use the bottom bar.
+var NAV_POS = ['top', 'right'];
+var NAV_RAIL = { open: 220, icons: 72 };
+var NAV_MIN_SHOWN = 2;
+function navDefault() { return { pos: 'top', order: NAV_IDS.slice(), hidden: {}, icons: false, phoneMax: 5 }; }
+// Keeps saved settings valid as menu items change: unknown ids drop out, new ones join the end, Home stays first.
+function navClean(raw) {
+  var n = navDefault();
+  if (!raw || typeof raw !== 'object') return n;
+  if (NAV_POS.indexOf(raw.pos) >= 0) n.pos = raw.pos;
+  var order = (Array.isArray(raw.order) ? raw.order : []).filter(function (id, i, a) { return id !== 'home' && NAV_IDS.indexOf(id) >= 0 && a.indexOf(id) === i; });
+  NAV_IDS.forEach(function (id) { if (id !== 'home' && order.indexOf(id) < 0) order.push(id); });
+  n.order = ['home'].concat(order);
+  if (raw.hidden && typeof raw.hidden === 'object') NAV_IDS.forEach(function (id) { if (id !== 'home' && raw.hidden[id]) n.hidden[id] = true; });
+  if (NAV_IDS.length - Object.keys(n.hidden).length < NAV_MIN_SHOWN) n.hidden = {};
+  n.icons = !!raw.icons;
+  if ([3, 4, 5].indexOf(raw.phoneMax) >= 0) n.phoneMax = raw.phoneMax;
+  return n;
+}
+function navLoad() { try { return navClean(JSON.parse(window.localStorage.getItem(NAV_KEY))); } catch (err) { return navDefault(); } }
+function navSave(n) { try { window.localStorage.setItem(NAV_KEY, JSON.stringify(n)); } catch (err) {} }
+
 // The app component: state, and the values each part of the template reads.
 class Component extends DCLogic {
   constructor(props) {
     super(props);
     this.state = this.fresh(this.keyFor(props.persona), props.allowCompare !== false);
+    // Menu settings belong to the user, not the persona, so they sit outside fresh() and survive a persona switch.
+    this.state.nav = navLoad();
   }
+  setNav(patch) { var n = navClean(Object.assign({}, this.state.nav, patch)); navSave(n); this.setState({ nav: n }); }
   keyFor(label) { return { 'Loan officer': 'lo', 'Lender executive': 'exec', 'Recruiter': 'rec', 'Account executive': 'ae' }[label] || 'lo'; }
   componentDidUpdate(prev) {
     if (prev.persona !== this.props.persona) this.setState(this.fresh(this.keyFor(this.props.persona), this.state.allowCompare));
@@ -1264,6 +1293,124 @@ class Component extends DCLogic {
       srActionsRow: 'display: flex; flex-wrap: wrap; align-items: center; gap: 8px; ' + (compact ? 'padding: 0 0 14px;' : 'padding: 0 12px 16px 60px;')
     };
   }
+  // The main menu (bottom, left or top, phone overflow under More) and the Settings dialog that arranges it.
+  navVals(compact, remaining) {
+    var self = this, s = this.state, d = this.data(), tab = s.tab, nav = s.nav;
+    var pos = compact ? 'bottom' : nav.pos, side = pos === 'right', icons = !!nav.icons;
+    var defs = { home: { label: 'Home' }, explore: { label: 'Explore' }, actions: { label: 'Action items', short: 'Actions' }, reports: { label: 'Reports' },
+      crm: { label: d.crmTitle, short: d.crmTitle.split(' ').pop().replace(/^./, function (ch) { return ch.toUpperCase(); }) } };
+    var shown = nav.order.filter(function (id) { return !nav.hidden[id]; });
+    // Phone: past the bar's limit, the last slot becomes More and the rest go in its list.
+    var extra = [];
+    if (compact && shown.length > nav.phoneMax) { extra = shown.slice(nav.phoneMax - 1); shown = shown.slice(0, nav.phoneMax - 1); }
+    var kinds = function (id) { return { isHome: id === 'home', isExplore: id === 'explore', isActions: id === 'actions', isReports: id === 'reports', isCrm: id === 'crm' }; };
+    var go = function (id) { return function () { self.setState({ tab: id, aiPop: false, srOpen: false, navMore: false }); }; };
+    var badgeBase = 'box-sizing: border-box; border-radius: 999px; background: #F89624; color: #24285D; font-weight: 700; text-align: center; ';
+    // Phone, and desktop icon-only: the count sits as a small badge on the icon's top right corner.
+    var corner = compact || icons;
+    var menu = shown.map(function (id) {
+      var m = defs[id], on = tab === id, label = compact && m.short ? m.short : m.label;
+      return Object.assign(kinds(id), { label: label, showLabel: !icons, aria: icons ? m.label : false, title: icons ? m.label : false, current: on ? 'page' : 'false',
+        hasBadge: id === 'actions' && remaining > 0,
+        badgeStyle: badgeBase + (corner ? 'position: absolute; top: ' + (compact ? '3px' : '6px') + '; left: calc(50% + 3px); min-width: 17px; height: 17px; padding: 0 4px; font-size: 10px; line-height: 15px; border: 1px solid ' + (on && side ? '#FFFFFF' : '#24285D') + ';' : 'min-width: 20px; height: 20px; padding: 0 6px; font-size: 11px; line-height: 20px;' + (side ? ' margin-left: auto;' : '')),
+        go: go(id),
+        style: FONT + 'display: flex; align-items: center; position: relative; border: none; font-weight: 600; cursor: pointer; white-space: nowrap; box-sizing: border-box; ' + (compact
+          ? 'justify-content: center; gap: 2px; flex-direction: column; flex: 1 1 0; min-height: ' + (icons ? '44px' : '52px') + '; padding: 4px 2px; font-size: 11px; border-radius: 12px; ' + (on ? 'background: #FFFFFF; color: #24285D;' : 'background: transparent; color: #EEF0F8;')
+          // Right rail: full-width rows, the current page as a white row.
+          : side ? 'gap: 12px; width: 100%; min-height: 44px; font-size: 14px; border-radius: 10px; ' + (icons ? 'justify-content: center; padding: 0;' : 'justify-content: flex-start; padding: 0 14px;') + (on ? 'background: #FFFFFF; color: #24285D;' : 'background: transparent; color: #DDE0EE;')
+          // Top bar: tabs with an orange underline on the current page.
+          : 'justify-content: center; gap: 8px; height: 48px; font-size: 14px; border-radius: 0; ' + (icons ? 'width: 52px; padding: 0;' : 'padding: 0 16px;') + (on ? 'background: rgba(255,255,255,0.10); color: #FFFFFF; box-shadow: inset 0 -3px 0 #F89624;' : 'background: transparent; color: #C9CCE3;')) });
+    });
+    var moreOn = extra.indexOf(tab) >= 0, moreOpen = !!s.navMore && extra.length > 0;
+    var railW = icons ? NAV_RAIL.icons : NAV_RAIL.open;
+    var menuStyle = compact ? 'display: flex; position: absolute; z-index: 30; align-items: center; left: 8px; right: 80px; bottom: 8px; gap: 2px; padding: 6px; border-radius: 18px; background: #24285D; border: 1px solid #15183A; box-sizing: border-box; box-shadow: 0 2px 4px rgba(21,24,58,0.20), 0 12px 32px rgba(21,24,58,0.30);'
+      // Docked to the right edge from the header down; it stays under the header (z-index 20) so the search dropdown opens over it.
+      : side ? 'display: flex; position: absolute; z-index: 15; right: 0; top: 64px; bottom: 0; width: ' + railW + 'px; flex-direction: column; align-items: stretch; gap: 4px; padding: 16px 12px; box-sizing: border-box; background: #24285D; border-left: 1px solid #15183A;'
+      // Docked under the header, full width, in the page flow (order 1, between the header and the page).
+      : 'display: flex; position: relative; z-index: 15; order: 1; flex-shrink: 0; align-items: stretch; gap: 2px; padding: 0 40px; margin-bottom: 16px; overflow-x: auto; background: #24285D; box-shadow: 0 2px 6px rgba(21,24,58,0.18);';
+    var colBtn = FONT + 'display: flex; align-items: center; gap: 10px; flex-shrink: 0; border: none; background: transparent; color: #C9CCE3; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; box-sizing: border-box; ';
+
+    // Settings dialog: menu items in order. Home stays first; at least NAV_MIN_SHOWN items stay visible.
+    var shownCount = nav.order.filter(function (id) { return !nav.hidden[id]; }).length;
+    var move = function (id, to) {
+      var o = self.state.nav.order.filter(function (x) { return x !== id; });
+      o.splice(Math.max(1, Math.min(to, o.length)), 0, id);
+      self.setNav({ order: o });
+    };
+    var ARROW = 'width: 36px; height: 36px; flex-shrink: 0; border: 1px solid #DADCE8; border-radius: 8px; background: #FFFFFF; color: #24285D; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0;';
+    var navItems = nav.order.map(function (id, i) {
+      var m = defs[id], locked = id === 'home', hidden = !!nav.hidden[id], last = i === nav.order.length - 1;
+      var canHide = locked ? false : hidden || shownCount > NAV_MIN_SHOWN;
+      return { label: m.label, locked: locked, movable: !locked, draggable: locked ? 'false' : 'true',
+        note: locked ? 'Always first' : hidden ? 'Hidden' : (compact && extra.indexOf(id) >= 0 ? 'Under More on phones' : ''),
+        showAttr: hidden ? 'false' : 'true', showAria: (hidden ? 'Show ' : 'Hide ') + m.label,
+        showTitle: canHide ? '' : 'At least ' + NAV_MIN_SHOWN + ' menu items stay visible',
+        showDisabled: !canHide,
+        toggle: function () {
+          // Reads the latest settings, so two quick toggles before a re-render both count.
+          var cur = self.state.nav, h = Object.assign({}, cur.hidden), off = !!h[id];
+          if (!off && NAV_IDS.length - Object.keys(h).length <= NAV_MIN_SHOWN) return;
+          if (off) delete h[id]; else h[id] = true;
+          self.setNav({ hidden: h });
+        },
+        upAria: 'Move ' + m.label + ' up', downAria: 'Move ' + m.label + ' down',
+        upDisabled: i <= 1, downDisabled: last,
+        up: function () { var at = self.state.nav.order.indexOf(id); if (at > 1) move(id, at - 1); },
+        down: function () { var at = self.state.nav.order.indexOf(id); if (at < self.state.nav.order.length - 1) move(id, at + 1); },
+        upStyle: ARROW + (i <= 1 ? ' opacity: 0.35; cursor: default;' : ''), downStyle: ARROW + (last ? ' opacity: 0.35; cursor: default;' : ''),
+        dragStart: function (e) { self._navDrag = id; if (e && e.dataTransfer) { e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', id); } catch (err) {} } },
+        dragEnd: function () { self._navDrag = null; },
+        dragOver: function (e) { if (self._navDrag && e && e.preventDefault) e.preventDefault(); },
+        drop: function (e) { if (e && e.preventDefault) e.preventDefault(); var from = self._navDrag; self._navDrag = null; if (from && from !== id) move(from, Math.max(1, self.state.nav.order.indexOf(id))); },
+        rowStyle: FONT + 'display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 6px 8px 6px 10px; box-sizing: border-box; border: 1px solid #DADCE8; border-radius: 10px; background: ' + (hidden ? '#F4F5F9' : '#FFFFFF') + '; color: ' + (hidden ? '#474945' : '#24285D') + '; ' + (locked ? '' : 'cursor: grab;'),
+        switchStyle: 'flex-shrink: 0; width: 44px; height: 26px; border-radius: 999px; border: none; padding: 3px; display: flex; box-sizing: border-box; justify-content: ' + (hidden ? 'flex-start' : 'flex-end') + '; background: ' + (hidden ? '#8286A8' : '#24285D') + '; ' + (canHide ? 'cursor: pointer;' : 'cursor: not-allowed; opacity: 0.45;') };
+    });
+    var choice = function (on) { return (on ? PILL_ON : PILL_OFF) + ' display: inline-flex; align-items: center; gap: 8px; min-height: 40px;'; };
+    return {
+      menu: menu, navPos: pos, navRailW: side ? railW : 0, menuStyle: menuStyle,
+      // Collapse to icons only, from the menu itself (desktop). Same setting as Settings > Menu labels.
+      navCanCollapse: !compact, navCollapsed: icons, navExpanded: !icons,
+      navCollapseLabel: icons ? 'Expand menu' : 'Collapse menu to icons', navCollapsePressed: icons ? 'true' : 'false',
+      navCollapse: function () { self.setNav({ icons: !self.state.nav.icons }); },
+      navCollapseStyle: colBtn + (side ? 'margin-top: auto; min-height: 40px; border-radius: 10px; ' + (icons ? 'justify-content: center; padding: 0;' : 'padding: 0 14px;') : 'margin-left: auto; height: 48px; padding: 0 12px;'),
+      // Chevron points the way the menu will move: a rail collapses toward the right edge, the top bar toward the left.
+      navChevron: 'display: block; flex-shrink: 0; transform: rotate(' + (side ? (icons ? 180 : 0) : (icons ? 0 : 180)) + 'deg);',
+      fadeStyle: compact ? 'position: absolute; z-index: 29; left: 0; right: 0; bottom: 0; pointer-events: none; height: ' + (compact ? '96px' : '130px') + '; background: linear-gradient(to bottom, rgba(238,240,246,0), rgba(238,240,246,0.92) 55%, #EEF0F6);' : 'display: none;',
+      navHasMore: extra.length > 0, navMoreOpen: moreOpen, navMoreExpanded: moreOpen ? 'true' : 'false', navMoreLabel: icons ? '' : 'More', navMoreShowLabel: !icons,
+      navMoreCurrent: moreOn ? 'true' : 'false',
+      navMoreToggle: function () { self.setState({ navMore: !s.navMore, aiPop: false, srOpen: false }); },
+      navMoreClose: function () { self.setState({ navMore: false }); },
+      navMoreBtnStyle: FONT + 'display: flex; align-items: center; justify-content: center; gap: 2px; position: relative; flex-direction: column; flex: 1 1 0; min-height: ' + (icons ? '44px' : '52px') + '; padding: 4px 2px; font-size: 11px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; white-space: nowrap; ' + (moreOn || moreOpen ? 'background: #FFFFFF; color: #24285D;' : 'background: transparent; color: #EEF0F8;'),
+      navMoreItems: extra.map(function (id) {
+        var m = defs[id], on = tab === id;
+        return Object.assign(kinds(id), { label: m.label, current: on ? 'page' : 'false', go: go(id), hasBadge: id === 'actions' && remaining > 0,
+          style: FONT + 'display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 0 12px; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; text-align: left; cursor: pointer; ' + (on ? 'background: #24285D; color: #FFFFFF;' : 'background: transparent; color: #24285D;') });
+      }),
+      navMoreStyle: 'position: absolute; z-index: 32; right: 80px; bottom: 84px; width: 220px; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 14px; padding: 6px; display: flex; flex-direction: column; gap: 2px; box-shadow: 0 12px 32px rgba(36,40,93,0.22);',
+      navBadgeInline: 'margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; background: #F89624; color: #24285D; font-size: 11px; line-height: 20px; font-weight: 700; text-align: center;',
+      // Settings dialog values.
+      navPositions: [{ id: 'top', label: 'Top bar' }, { id: 'right', label: 'Right side' }].map(function (o) {
+        var on = nav.pos === o.id;
+        return { label: o.label, pressed: on ? 'true' : 'false', style: choice(on), isRight: o.id === 'right', isTop: o.id === 'top',
+          pick: function () { self.setNav({ pos: o.id }); } };
+      }),
+      navPhoneNote: compact,
+      navLabelOpts: [{ v: false, label: 'Icons and labels' }, { v: true, label: 'Icons only' }].map(function (o) {
+        var on = icons === o.v;
+        return { label: o.label, pressed: on ? 'true' : 'false', style: choice(on), pick: function () { self.setNav({ icons: o.v }); } };
+      }),
+      navPhoneOpts: [3, 4, 5].map(function (n) {
+        var on = nav.phoneMax === n;
+        return { label: String(n), pressed: on ? 'true' : 'false', style: choice(on) + ' justify-content: center; min-width: 52px;', pick: function () { self.setNav({ phoneMax: n }); } };
+      }),
+      navPhoneHint: shownCount > nav.phoneMax ? (shownCount - nav.phoneMax + 1) + ' of your ' + shownCount + ' items go under More on a phone.' : 'All ' + shownCount + ' items fit on the phone bar.',
+      navItems: navItems,
+      navIsDefault: JSON.stringify(nav) === JSON.stringify(navDefault()),
+      navReset: function () { self.setNav(navDefault()); },
+      navDone: function () { self.setState({ modal: null }); },
+      navSecLabel: 'margin: 0; font-family: Montserrat, sans-serif; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.12em; color: #474945;'
+    };
+  }
   renderVals() {
     var self = this, s = this.state, d = this.data(), x = EXTRA[s.persona];
     var compact = !!this.props.compact;
@@ -1341,16 +1488,7 @@ class Component extends DCLogic {
     var xlabels = [0, 6, 12, 18, 24, 29].map(dayLabel);
 
     var prompts = this.prompts();
-    var menuDef = [{ id: 'home', label: 'Home' }, { id: 'explore', label: 'Explore' }, { id: 'actions', label: 'Action items', short: 'Actions' }, { id: 'reports', label: 'Reports' }, { id: 'crm', label: d.crmTitle, short: d.crmTitle.split(' ').pop().replace(/^./, function (ch) { return ch.toUpperCase(); }) }];
-    var menu = menuDef.map(function (m) {
-      var on = tab === m.id;
-      return { label: compact && m.short ? m.short : m.label, isReports: m.id === 'reports', current: on ? 'page' : 'false', isHome: m.id === 'home', isExplore: m.id === 'explore', isActions: m.id === 'actions', isCrm: m.id === 'crm',
-        hasBadge: m.id === 'actions' && remaining > 0,
-        // Phone: the count sits as a small badge on the icon's top right corner.
-        badgeStyle: 'box-sizing: border-box; border-radius: 999px; background: #F89624; color: #24285D; font-weight: 700; text-align: center; ' + (compact ? 'position: absolute; top: 3px; left: calc(50% + 3px); min-width: 17px; height: 17px; padding: 0 4px; font-size: 10px; line-height: 15px; border: 1px solid ' + (on ? '#FFFFFF' : '#24285D') + ';' : 'min-width: 20px; height: 20px; padding: 0 6px; font-size: 11px; line-height: 20px;'),
-        go: function () { self.setState({ tab: m.id, aiPop: false, srOpen: false }); },
-        style: FONT + 'display: flex; align-items: center; justify-content: center; gap: ' + (compact ? '2px; position: relative; flex-direction: column; flex: 1 1 0; min-height: 52px; padding: 4px 2px; font-size: 11px; border-radius: 12px;' : '8px; min-height: 44px; padding: 0 16px; font-size: 14px; border-radius: 999px;') + ' border: none; font-weight: 600; cursor: pointer; white-space: nowrap; ' + (on ? 'background: #FFFFFF; color: #24285D;' : 'background: transparent; color: #EEF0F8;') };
-    });
+    var nv = this.navVals(compact, remaining);
     var titles = { home: 'Home', explore: 'Explore', actions: 'Action items', reports: 'Reports', crm: d.crmTitle, search: 'Search' };
     var cardR = '16px';
     var cardStyle = 'background: #FFFFFF; border: 1px solid #DADCE8; border-radius: ' + cardR + '; display: flex; flex-direction: column; min-width: 0; box-sizing: border-box; ' + (compact ? 'padding: 16px; gap: 12px;' : 'padding: 20px 24px; gap: 14px;');
@@ -1364,17 +1502,18 @@ class Component extends DCLogic {
       }) };
     });
 
-    return Object.assign(this.reportVals(compact), this.pipeVals(compact), this.homeVals(compact), this.searchVals(compact), {
+    return Object.assign(this.reportVals(compact), this.pipeVals(compact), this.homeVals(compact), this.searchVals(compact), nv, {
       d: dd, compact: compact, wide: !compact,
       rootStyle: VARS + FONT + 'position: relative; overflow: hidden; display: flex; flex-direction: column; background: #EEF0F6; color: #24285D; ' + 'width: 100%; height: 100%;',
-      headerStyle: 'position: relative; z-index: ' + (compact && s.srOpen && tab !== 'search' ? '60' : '20') + '; flex-shrink: 0; display: flex; align-items: center; box-sizing: border-box; ' + (compact ? 'gap: 10px; min-height: 56px; padding: 8px 16px;' : 'gap: 16px; min-height: 64px; padding: 12px 40px; margin-bottom: 16px;') + ' background: #FFFFFF; border-bottom: 1px solid #DADCE8; box-shadow: 0 1px 3px rgba(36,40,93,0.06);',
+      headerStyle: 'position: relative; z-index: ' + (compact && s.srOpen && tab !== 'search' ? '60' : '20') + '; flex-shrink: 0; display: flex; align-items: center; box-sizing: border-box; ' + (compact ? 'gap: 10px; min-height: 56px; padding: 8px 16px;' : 'gap: 16px; min-height: 64px; padding: 12px 40px; margin-bottom: ' + (nv.navPos === 'top' ? '0;' : '16px;')) + ' background: #FFFFFF; border-bottom: 1px solid #DADCE8; box-shadow: 0 1px 3px rgba(36,40,93,0.06);',
       hdrSpacer: 'flex-grow: 1;',
       logoStyle: 'display: block; flex-shrink: 0; ' + (compact ? 'order: -2; width: 26px; height: 34px;' : 'width: 28px; height: 36px;'),
       pageTitle: titles[tab],
       acctName: !compact && !!this.props.roomy,
       acctAria: 'Signed in as ' + d.name + ', ' + d.role + '. Switch persona (prototype)',
       acctStyle: FONT + 'display: flex; align-items: center; gap: 10px; min-width: 0; flex-shrink: 1; padding: 0; border: none; background: transparent; cursor: pointer; text-align: right;',
-      mainStyle: 'flex-grow: 1; min-height: 0; overflow-y: auto; box-sizing: border-box; ' + (compact ? 'padding: 20px 16px 96px;' : 'padding: 8px 40px 120px;'),
+      // The right rail takes its width off the page (margin, so the page's scrollbar stays visible); the top bar sits between the header and the page (order 1).
+      mainStyle: 'flex-grow: 1; min-height: 0; overflow-y: auto; box-sizing: border-box; ' + (compact ? 'padding: 20px 16px 96px;' : 'order: 2; padding: 8px 40px 112px; margin-right: ' + nv.navRailW + 'px;'),
       // Desktop: Action items floats right and the other widgets wrap around it, going full width once they pass its bottom.
       gridStyle: compact ? 'display: grid; gap: 20px; align-items: start; grid-template-columns: repeat(1, minmax(0, 1fr));' : 'display: flow-root;',
       homeSideStyle: 'display: flex; flex-direction: column; gap: 20px; min-width: 0; ' + (compact ? 'order: 1;' : 'float: right; width: calc((100% - 20px) / 3); margin: 0 0 20px 20px;'),
@@ -1409,11 +1548,9 @@ class Component extends DCLogic {
       countLine: 'Showing ' + results.length + ' of ' + v.total + ' ' + v.noun + ' · ' + d.territory,
       stagesGrid: 'display: grid; gap: 12px; ' + (compact ? 'grid-template-columns: repeat(2, minmax(0, 1fr));' : 'grid-template-columns: repeat(4, minmax(0, 1fr));'),
       log: s.log.concat(d.log),
-      menu: menu, remaining: remaining,
-      fadeStyle: 'position: absolute; z-index: 29; left: 0; right: 0; bottom: 0; pointer-events: none; height: ' + (compact ? '96px' : '130px') + '; background: linear-gradient(to bottom, rgba(238,240,246,0), rgba(238,240,246,0.92) 55%, #EEF0F6);',
-      menuStyle: 'position: absolute; z-index: 30; display: flex; align-items: center; background: #24285D; border: 1px solid #15183A; box-sizing: border-box; box-shadow: 0 2px 4px rgba(21,24,58,0.20), 0 12px 32px rgba(21,24,58,0.30); ' + (compact ? 'left: 8px; right: 80px; bottom: 8px; gap: 2px; padding: 6px; border-radius: 18px;' : 'left: 50%; bottom: 24px; transform: translateX(-50%); gap: 4px; padding: 6px; border-radius: 999px;'),
+      remaining: remaining,
       aiExpanded: s.aiPop ? 'true' : 'false',
-      aiBtnStyle: 'position: absolute; z-index: 31; display: flex; align-items: center; justify-content: center; padding: 0; border: 2px solid #FFFFFF; border-radius: 999px; cursor: pointer; background: #F89624; color: #24285D; box-shadow: 0 2px 4px rgba(21,24,58,0.20), 0 12px 28px rgba(21,24,58,0.28); ' + (compact ? 'right: 8px; bottom: 8px; width: 64px; height: 64px;' : 'right: 40px; bottom: 22px; width: 64px; height: 64px;') + (s.aiPop ? ' outline: 3px solid #24285D; outline-offset: 2px;' : ''),
+      aiBtnStyle: 'position: absolute; z-index: 31; display: flex; align-items: center; justify-content: center; padding: 0; border: 2px solid #FFFFFF; border-radius: 999px; cursor: pointer; background: #F89624; color: #24285D; box-shadow: 0 2px 4px rgba(21,24,58,0.20), 0 12px 28px rgba(21,24,58,0.28); ' + (compact ? 'right: 8px; bottom: 8px; width: 64px; height: 64px;' : 'right: ' + (nv.navRailW + 32) + 'px; bottom: 22px; width: 64px; height: 64px;') + (s.aiPop ? ' outline: 3px solid #24285D; outline-offset: 2px;' : ''),
       lampSize: '32',
       toggleAi: function () { self.setState({ aiPop: !s.aiPop, srOpen: false }); },
       closeAi: function () { self.setState({ aiPop: false, aiFull: false }); },
@@ -1447,7 +1584,7 @@ class Component extends DCLogic {
       nudgeOnAttr: s.nudgeOff ? 'false' : 'true', nudgeToggle: function () { self.setState({ nudgeOff: !s.nudgeOff, nudgeHidden: {} }); },
       nudgeTrack: 'width: 36px; height: 20px; border-radius: 999px; flex-shrink: 0; position: relative; display: inline-block; ' + (s.nudgeOff ? 'background: #DADCE8;' : 'background: #24285D;'),
       nudgeKnob: 'position: absolute; top: 2px; width: 16px; height: 16px; border-radius: 999px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(21,24,58,0.3); ' + (s.nudgeOff ? 'left: 2px;' : 'left: 18px;'),
-      nudgeStyle: 'position: absolute; z-index: 31; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 12px 32px rgba(36,40,93,0.22); ' + (compact ? 'left: 12px; right: 12px; bottom: 88px;' : 'right: 40px; bottom: 100px; width: 320px;'),
+      nudgeStyle: 'position: absolute; z-index: 31; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 12px 32px rgba(36,40,93,0.22); ' + (compact ? 'left: 12px; right: 12px; bottom: 88px;' : 'right: ' + (nv.navRailW + 32) + 'px; bottom: 100px; width: 320px;'),
       nudgeTail: 'position: absolute; bottom: -7px; right: 26px; width: 12px; height: 12px; background: #FFFFFF; border-right: 1px solid #DADCE8; border-bottom: 1px solid #DADCE8; transform: rotate(45deg);',
       aiCanBrief: tab === 'reports', aiBriefing: !!s.aiBrief && tab === 'reports',
       aiBriefSub: 'Genie summarizes what stands out and checks the numbers.',
@@ -1458,10 +1595,11 @@ class Component extends DCLogic {
         iconStyle: 'width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; ' + (i === 3 ? 'background: #F89624; color: #24285D;' : 'background: #24285D; color: #FFFFFF;') }; }),
       clearThread: function () { self.setState({ thread: [] }); },
       showResults: function () { self.setState({ tab: 'explore', aiPop: false }); },
-      modalOpen: !!s.modal, modalFilters: s.modal === 'filters', modalPersona: s.modal === 'persona',
+      modalOpen: !!s.modal, modalFilters: s.modal === 'filters', modalPersona: s.modal === 'persona', modalSettings: s.modal === 'settings',
       dialogStyle: 'position: absolute; z-index: 40; background: #FFFFFF; overflow-y: auto; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 8px 24px rgba(36, 40, 93, 0.18); ' + (compact ? 'left: 0; right: 0; bottom: 0; max-height: 760px; border-radius: 16px 16px 0 0; padding: 16px 16px 24px;' : 'top: 80px; left: 50%; width: 560px; margin-left: -280px; max-height: 740px; border-radius: 16px; padding: 24px;'),
       openFilters: function () { self.setState({ modal: 'filters' }); },
       openPersona: function () { self.setState({ modal: 'persona' }); },
+      openSettings: function () { self.setState({ modal: 'settings', navMore: false, srOpen: false, aiPop: false }); },
       closeModal: function () { self.setState({ modal: null }); },
       askInstead: function () { self.setState({ modal: null, aiPop: true }); },
       filterGroups: filterGroups,

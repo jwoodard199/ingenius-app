@@ -98,4 +98,34 @@ for (const persona of ['Loan officer', 'Lender executive', 'Recruiter', 'Account
     c.state.tab = 'home'; v = c.renderVals(); v.srOnInput({ target: { value: 'zzqx' } }); v = c.renderVals(); ok(v.srNoHits, 'quick search empty state');
   }
 }
+// Menu settings: position, order, show/hide, icon-only labels, phone overflow under More, reset, and saving.
+{
+  const store = {}; global.localStorage = { getItem: k => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); } };
+  store['ingenius.menu'] = JSON.stringify({ pos: 'bottom' });
+  const c = new Component({ persona: 'Loan officer', compact: false, allowCompare: true });
+  let v = c.renderVals();
+  ok(c.state.nav.pos === 'top', 'an old saved position falls back to the top bar');
+  ok(v.navPos === 'top' && v.menu.length === 5 && v.navIsDefault && /order: 1/.test(v.menuStyle) && /display: none/.test(v.fadeStyle), 'menu starts as a top bar under the header with every item');
+  c.state.modal = 'settings'; v = c.renderVals(); ok(v.modalSettings && v.navItems.length === 5 && v.navItems[0].locked, 'settings lists the menu items with Home locked first');
+  v.navPositions[1].pick(); v = c.renderVals(); ok(v.navPos === 'right' && /right: 0; top: 64px; bottom: 0; width: 220px/.test(v.menuStyle) && /margin-right: 220px/.test(v.mainStyle) && /right: 252px/.test(v.aiBtnStyle), 'right rail docks and moves Genie clear of it');
+  v.navCollapse(); v = c.renderVals(); ok(!v.menu[0].showLabel && /width: 72px/.test(v.menuStyle) && /margin-right: 72px/.test(v.mainStyle), 'rail collapses to icons');
+  v.navCollapse(); v = c.renderVals(); ok(v.menu[0].showLabel, 'rail expands again');
+  v.navPositions[0].pick(); v = c.renderVals(); ok(v.navPos === 'top' && /margin-right: 0px/.test(v.mainStyle), 'back to the top bar');
+  v.navItems[3].up(); v = c.renderVals(); ok(v.menu.map(m => m.label).join() === 'Home,Explore,Reports,Action items,My pipeline', 'arrows reorder');
+  v.navItems[1].dragStart({}); v.navItems[4].drop({ preventDefault() {} }); v = c.renderVals(); ok(v.menu[4].label === 'Explore', 'drag and drop reorders');
+  v.navItems[1].up(); v = c.renderVals(); ok(v.menu[0].label === 'Home', 'Home stays first');
+  v.navItems[1].toggle(); v.navItems[2].toggle(); v = c.renderVals(); ok(v.menu.length === 3, 'items can be hidden');
+  v.navItems[3].toggle(); v = c.renderVals(); ok(v.menu.length === 2 && v.navItems[4].showDisabled, 'at least two items stay visible');
+  v.navLabelOpts[1].pick(); v = c.renderVals(); ok(!v.menu[0].showLabel && v.menu[0].aria === 'Home', 'icons only keeps an accessible name');
+  ok(JSON.parse(store['ingenius.menu']).pos === 'top', 'settings are saved');
+  const again = new Component({ persona: 'Recruiter', compact: false, allowCompare: true }); ok(again.renderVals().menu.length === 2, 'settings load on the next visit');
+  v.personaList[2].pick(); v = c.renderVals(); ok(v.menu.length === 2, 'settings survive a persona switch');
+  v.navReset(); v = c.renderVals(); ok(v.navIsDefault && v.menu.length === 5, 'reset to default');
+  const ph = new Component({ persona: 'Loan officer', compact: true, allowCompare: true });
+  ph.state.nav.pos = 'right'; v = ph.renderVals(); ok(v.navPos === 'bottom' && !v.navHasMore && !v.navCanCollapse, 'phone keeps the bottom bar');
+  ph.setNav({ phoneMax: 3 }); v = ph.renderVals(); ok(v.menu.length === 2 && v.navHasMore && v.navMoreItems.length === 3, 'phone overflow goes under More');
+  v.navMoreToggle(); v = ph.renderVals(); ok(v.navMoreOpen, 'More opens');
+  v.navMoreItems[2].go(); v = ph.renderVals(); ok(ph.state.tab === 'crm' && !v.navMoreOpen && v.navMoreCurrent === 'true', 'More item opens its page and marks More current');
+  delete global.localStorage;
+}
 console.log('ok: ' + checks + ' checks passed');
