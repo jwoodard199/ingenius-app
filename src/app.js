@@ -1041,6 +1041,11 @@ class Component extends DCLogic {
     this.setState(Object.assign({ tab: 'search', srOpen: false, srAct: -1, srLimit: SEARCH_PAGE, srPop: null, srSel: null, srRecent: recent, aiPop: false, homeEdit: false, modal: null }, patch));
     if (patch.srSel && typeof document !== 'undefined') setTimeout(function () { var el = document.getElementById('sr-row-' + patch.srSel); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'center' }); }, 80);
   }
+  // New results start at the top of the dropdown, not wherever the last query was scrolled to.
+  searchTop() {
+    if (typeof document === 'undefined') return;
+    setTimeout(function () { var el = document.getElementById('ig-search-list'); if (el) el.scrollTop = 0; }, 40);
+  }
   focusSearch() {
     if (typeof document === 'undefined') return;
     setTimeout(function () { var el = document.getElementById('ig-search') || document.getElementById('ig-search-page'); if (el) el.focus(); }, 40);
@@ -1179,7 +1184,7 @@ class Component extends DCLogic {
       srExpanded: panelOpen ? 'true' : 'false',
       srActive: s.srAct >= 0 && flat[s.srAct] ? flat[s.srAct].id : '',
       srPlaceholder: onlyCat ? 'Search ' + onlyCat.label.toLowerCase() : compact ? 'Search people, companies, homes' : 'Search loan officers, lenders, agents, offices, title, properties',
-      srOnInput: function (e) { var v = e && e.target ? e.target.value : ''; self.setState({ srQ: v, srOpen: true, srAct: -1, srLimit: SEARCH_PAGE, srSel: null }); },
+      srOnInput: function (e) { var v = e && e.target ? e.target.value : ''; self.setState({ srQ: v, srOpen: true, srAct: -1, srLimit: SEARCH_PAGE, srSel: null }); self.searchTop(); },
       srOnClick: function () { if (!self.state.srOpen) self.setState({ srOpen: true }); },
       srOnKey: function (e) {
         var k = e && e.key;
@@ -1209,8 +1214,8 @@ class Component extends DCLogic {
       srBoxStyle: FONT + 'flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 6px 0 14px; box-sizing: border-box; border-radius: 999px; cursor: text; ' + (panelOpen ? 'border: 1px solid #24285D; background: #FFFFFF; box-shadow: 0 0 0 3px rgba(36,40,93,0.10);' : 'border: 1px solid #DADCE8; background: #F4F5F9;'),
       srPanelStyle: compact
         ? 'flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-top: 4px;'
-        : 'position: absolute; z-index: 25; top: 48px; left: 0; width: 640px; max-width: calc(100vw - 300px); min-width: 100%; max-height: calc(100vh - 120px); overflow-y: auto; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 16px 40px rgba(36,40,93,0.20);',
-      srChipRow: 'display: flex; gap: 6px; ' + (compact ? 'overflow-x: auto; padding-bottom: 2px;' : 'flex-wrap: wrap;'),
+        : 'position: absolute; z-index: 25; top: 48px; left: 0; width: 640px; max-width: calc(100vw - 300px); min-width: 100%; max-height: calc(100vh - 196px); overflow-y: auto; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 16px 40px rgba(36,40,93,0.20);',
+      srChipRow: 'display: flex; flex-shrink: 0; gap: 6px; ' + (compact ? 'overflow-x: auto; padding-bottom: 2px;' : 'flex-wrap: wrap;'),
       srChips: chips,
       srRecent: (s.srRecent || []).map(function (r) { return { label: r, go: function () { self.setState({ srQ: r, srOpen: true, srAct: -1 }); self.focusSearch(); } }; }),
       srHasRecent: !hasQ && (s.srRecent || []).length > 0,
@@ -1363,9 +1368,12 @@ class Component extends DCLogic {
       d: dd, compact: compact, wide: !compact,
       rootStyle: VARS + FONT + 'position: relative; overflow: hidden; display: flex; flex-direction: column; background: #EEF0F6; color: #24285D; ' + 'width: 100%; height: 100%;',
       headerStyle: 'position: relative; z-index: ' + (compact && s.srOpen && tab !== 'search' ? '60' : '20') + '; flex-shrink: 0; display: flex; align-items: center; box-sizing: border-box; ' + (compact ? 'gap: 10px; min-height: 56px; padding: 8px 16px;' : 'gap: 16px; min-height: 64px; padding: 12px 40px; margin-bottom: 16px;') + ' background: #FFFFFF; border-bottom: 1px solid #DADCE8; box-shadow: 0 1px 3px rgba(36,40,93,0.06);',
-      hdrSpacer: 'flex-grow: 1; ' + (compact ? 'order: -1;' : ''),
+      hdrSpacer: 'flex-grow: 1;',
       logoStyle: 'display: block; flex-shrink: 0; ' + (compact ? 'order: -2; width: 26px; height: 34px;' : 'width: 28px; height: 36px;'),
       pageTitle: titles[tab],
+      acctName: !compact && !!this.props.roomy,
+      acctAria: 'Signed in as ' + d.name + ', ' + d.role + '. Switch persona (prototype)',
+      acctStyle: FONT + 'display: flex; align-items: center; gap: 10px; min-width: 0; flex-shrink: 1; padding: 0; border: none; background: transparent; cursor: pointer; text-align: right;',
       mainStyle: 'flex-grow: 1; min-height: 0; overflow-y: auto; box-sizing: border-box; ' + (compact ? 'padding: 20px 16px 96px;' : 'padding: 8px 40px 120px;'),
       // Desktop: Action items floats right and the other widgets wrap around it, going full width once they pass its bottom.
       gridStyle: compact ? 'display: grid; gap: 20px; align-items: start; grid-template-columns: repeat(1, minmax(0, 1fr));' : 'display: flow-root;',

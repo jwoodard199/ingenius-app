@@ -16,13 +16,7 @@
 
   <header style="{{headerStyle}}">
     <span role="img" aria-label="InGenius" style="{{logoStyle}}"><svg viewBox="53 -2 52 68" width="100%" height="100%" aria-hidden="true" style="display: block;"><defs><linearGradient id="igBulbGrad" x1="79" y1="0" x2="101" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#F7C42A"></stop><stop offset="1" stop-color="#F89522"></stop></linearGradient><clipPath id="igBulbClip"><path d="M67 58.5V51C67 45 57 38.5 57 25.5A22 22 0 0 1 101 25.5C101 38.5 91 45 91 51V58.5Z"></path></clipPath></defs><path d="M67 58.5V51C67 45 57 38.5 57 25.5A22 22 0 0 1 101 25.5C101 38.5 91 45 91 51V58.5Z" fill="#FFFFFF"></path><rect x="79.5" y="0" width="24" height="60" fill="url(#igBulbGrad)" clip-path="url(#igBulbClip)"></rect><path d="M67 58.5V51C67 45 57 38.5 57 25.5A22 22 0 0 1 101 25.5C101 38.5 91 45 91 51V58.5Z" fill="none" stroke="#24285D" stroke-width="4" stroke-linejoin="round"></path><path d="M65 57.5H93V60.5A3 3 0 0 1 90 63.5H68A3 3 0 0 1 65 60.5Z" fill="#24285D"></path></svg></span>
-    <sc-if value="{{wide}}" hint-placeholder-val="{{true}}">
-      <div style="width: 1px; height: 28px; background: #DADCE8;"></div>
-      <div style="display: flex; flex-direction: column; min-width: 0; flex-shrink: 1; white-space: nowrap;">
-        <span style="font-family: Montserrat, sans-serif; font-size: 18px; line-height: 24px; font-weight: 700; overflow: hidden; text-overflow: ellipsis;">{{pageTitle}}</span>
-        <span style="font-size: 13px; line-height: 18px; color: #474945; overflow: hidden; text-overflow: ellipsis;">{{d.role}} · Thursday, September 25</span>
-      </div>
-    </sc-if>
+    <h1 style="position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;">{{pageTitle}}</h1>
     <sc-if value="{{srShowIcon}}" hint-placeholder-val="{{false}}">
       <button type="button" onClick="{{srOpenIcon}}" aria-label="Search" title="Search" style="width: 40px; height: 40px; flex-shrink: 0; border-radius: 999px; border: 1px solid #DADCE8; background: #FFFFFF; color: #24285D; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
@@ -157,7 +151,15 @@
     <button type="button" aria-label="Notifications" style="width: 40px; height: 40px; border-radius: 999px; border: 1px solid #DADCE8; background: #FFFFFF; color: #24285D; display: flex; align-items: center; justify-content: center; cursor: pointer;">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg>
     </button>
-    <button type="button" onClick="{{openPersona}}" aria-label="Switch persona (prototype)" style="width: 40px; height: 40px; border-radius: 999px; border: none; background: #24285D; color: #FFFFFF; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 13px; cursor: pointer;">{{d.initials}}</button>
+    <button type="button" onClick="{{openPersona}}" aria-label="{{acctAria}}" title="Switch persona (prototype)" style="{{acctStyle}}">
+      <sc-if value="{{acctName}}" hint-placeholder-val="{{true}}">
+        <span style="display: flex; flex-direction: column; align-items: flex-end; min-width: 0; white-space: nowrap; text-align: right;">
+          <span style="font-size: 14px; line-height: 18px; font-weight: 600; color: #24285D; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">{{d.name}}</span>
+          <span style="font-size: 12px; line-height: 16px; color: #474945; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">{{d.role}}</span>
+        </span>
+      </sc-if>
+      <span style="width: 40px; height: 40px; flex-shrink: 0; border-radius: 999px; background: #24285D; color: #FFFFFF; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center;">{{d.initials}}</span>
+    </button>
   </header>
 
   <main style="{{mainStyle}}">
