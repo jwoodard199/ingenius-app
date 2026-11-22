@@ -1,14 +1,14 @@
 /* Base page styles plus the InGenius design-system component classes (ig-btn, ig-tag, ...). */
 html, body { height: 100%; }
-body { margin: 0; background: #EEF0F6; color: #24285D; }
+body { margin: 0; background: #EEF4F6; color: #245A8A; }
 #app { height: 100%; }
-button:focus-visible, input:focus-visible { outline: 2px solid #24285D; outline-offset: 2px; }
+button:focus-visible, input:focus-visible { outline: 2px solid #245A8A; outline-offset: 2px; }
 
 .ig-btn{font-family:var(--font-display);font-weight:600;font-size:14px;line-height:20px;letter-spacing:.01em;padding:var(--space-3) 20px;border-radius:var(--radius-md);border:1px solid transparent;cursor:pointer;display:inline-flex;align-items:center;gap:var(--space-2)}
 .ig-btn:focus-visible{outline:2px solid var(--action);outline-offset:2px}
 .ig-btn-primary{background:var(--action);color:var(--on-action)}
 .ig-btn-primary:hover{filter:brightness(1.12)}
-.ig-btn-accent{background:var(--ingenius-orange);color:var(--ingenius-blue-primary)}
+.ig-btn-accent{background:var(--ingenius-gold);color:var(--on-accent)}
 .ig-btn-accent:hover{filter:brightness(1.05)}
 .ig-btn-secondary{background:transparent;color:var(--ink);border-color:var(--line-strong)}
 .ig-btn-secondary:hover{background:var(--surface-alt)}
@@ -16,7 +16,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid #24285D; outline-
 
 .ig-tag{display:inline-flex;align-items:center;gap:var(--space-1);font-family:var(--font-sans);font-size:12px;line-height:16px;font-weight:600;padding:2px var(--space-2);border-radius:var(--radius-sm);border:1px solid var(--line)}
 .ig-tag-neutral{background:var(--surface-alt);color:var(--ink)}
-.ig-tag-accent{background:var(--ingenius-orange);color:var(--ingenius-blue-primary);border-color:transparent}
+.ig-tag-accent{background:var(--ingenius-gold);color:var(--on-accent);border-color:transparent}
 .ig-tag-success{background:var(--surface);color:var(--success);border-color:var(--success)}
 .ig-tag-danger{background:var(--surface);color:var(--danger);border-color:var(--danger)}
 

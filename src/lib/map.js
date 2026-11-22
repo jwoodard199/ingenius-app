@@ -18,7 +18,7 @@ var MAP_PERSONA = {
   rec: { metrics: ['lodens', 'window', 'purchase'], start: { st: '48', co: '48201' } },
   ae: { metrics: ['loyalty', 'broker', 'purchase'], start: { st: '04', co: '04013' } }
 };
-var RAMP = ['#E4E6F1', '#B6BBD9', '#8288BA', '#4E5496', '#24285D'];
+var RAMP = ['#E4ECF1', '#B6CBD9', '#82A2BA', '#3F6F99', '#173A5C'];
 function hash01(str) { var h = 2166136261; for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return ((h >>> 0) % 10000) / 10000; }
 function mapValue(mk, reg, level) {
   var m = MAP_METRICS[mk];
