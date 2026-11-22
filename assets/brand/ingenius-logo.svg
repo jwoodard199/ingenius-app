@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-280 -32 1265 312" role="img" aria-label="InGenius">
+  <g transform="translate(-280 -40) scale(0.595)">
+  <g fill="none" stroke="#C69C46" stroke-width="32" stroke-linejoin="round">
+    <path d="M120 392V345C120 300 34 272 34 205A167 167 0 0 1 368 205C368 272 282 300 282 345V392"/>
+    <path d="M165 392V310C165 280 143 255 143 205A58 58 0 0 1 259 205C259 255 237 280 237 310V392"/>
+    <circle cx="201" cy="210" r="22" stroke-width="20"/>
+    <path d="M100 392H302"/>
+    <path d="M118 445H284A83 61 0 0 1 118 445Z" stroke-width="30"/>
+  </g>
+  </g>
+  <g fill="none" stroke-width="30" stroke-linejoin="round">
+    <g stroke="#C69C46">
+      <path d="M25 73V205"/>
+      <path d="M100 73V205M100 205V128A40 40 0 0 1 140 88H155A40 40 0 0 1 195 128V205"/>
+    </g>
+    <g stroke="#245A8A">
+      <circle cx="287" cy="139" r="51"/>
+      <path d="M338 73V200C338 232 314 250 284 250C262 250 245 243 233 232"/>
+      <path d="M379 139H481A51 51 0 1 0 466 175"/>
+      <path d="M530 73V205M530 205V128A40 40 0 0 1 570 88H585A40 40 0 0 1 625 128V205"/>
+      <path d="M680 73V205"/>
+      <path d="M760 73V150A40 40 0 0 0 800 190H815A40 40 0 0 0 855 150V73M855 73V205"/>
+      <path d="M972 88H931A25.5 25.5 0 0 0 931 139H936A25.5 25.5 0 0 1 936 190H893"/>
+    </g>
+  </g>
+  <circle cx="25" cy="38" r="17" fill="#C69C46"/>
+  <g transform="translate(660 10) scale(0.1)">
+  <g fill="none" stroke="#C69C46" stroke-width="40" stroke-linejoin="round">
+    <path d="M120 392V345C120 300 34 272 34 205A167 167 0 0 1 368 205C368 272 282 300 282 345V392"/>
+    <circle cx="201" cy="210" r="48" stroke-width="36"/>
+    <path d="M100 392H302"/>
+    <path d="M118 455H284A83 61 0 0 1 118 455Z" stroke="none" fill="#C69C46"/>
+  </g>
+  </g>
+</svg>

@@ -10,7 +10,7 @@ var HOME_DEFAULTS = {
 // ---- Pipeline board: deals (LO, AE) and recruits (exec, recruiter), example data ----
 // Each item: stage is an index into stages, value is dollars (loan amount, or yearly production / volume),
 // owner is an index into team, days is time in the current stage.
-var PIPE_DOTS = ['#8286A8', '#4E5496', '#24285D', '#F89624', '#1D7A55'];
+var PIPE_DOTS = ['#74899B', '#4E7596', '#245A8A', '#C69C46', '#1D7A55'];
 var PIPE_TODAY = 'Sep 26';
 var PIPELINES = {
   lo: {

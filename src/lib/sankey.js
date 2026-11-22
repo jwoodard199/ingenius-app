@@ -34,7 +34,7 @@ function sankeyCols(cols, links, W, H, opt) {
   return { nodes: list, links: ls, nodeW: nodeW };
 }
 // Soft ribbon colors, from the InGenius ramps.
-var SK = { navy: '#24285D', indigo: '#4E5496', lav: '#B6BBD9', grey: '#8286A8', green: '#1D7A55', orange: '#F89624', red: '#B3261E' };
+var SK = { navy: '#245A8A', indigo: '#4E7596', lav: '#B6CBD9', grey: '#74899B', green: '#1D7A55', orange: '#C69C46', red: '#B3261E' };
 function skTint(hex, a) { var n = parseInt(hex.slice(1), 16); return 'rgba(' + (n >> 16) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; }
 
 // ---- Loan retention: where past clients went (example data) ----

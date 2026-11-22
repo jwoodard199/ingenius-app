@@ -129,23 +129,23 @@ class Component extends DCLogic {
     var template = '40px ' + cols.map(function (c) { return 'minmax(' + Math.round(c.w * 0.85) + 'px, 1fr)'; }).join(' ');
     var minW = 40 + cols.reduce(function (a, c) { return a + Math.round(c.w * 0.85); }, 0);
     var rowBase = 'display: grid; grid-template-columns: ' + template + '; min-width: ' + minW + 'px;';
-    var CELL = 'box-sizing: border-box; padding: 0 10px; display: flex; align-items: center; min-height: 34px; border-right: 1px solid #EEF0F6; font-size: 13px; line-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; font-variant-numeric: tabular-nums; ';
-    var NUM = 'box-sizing: border-box; padding: 0 8px; display: flex; align-items: center; justify-content: flex-end; min-height: 34px; font-size: 11px; color: #8286A8; border-right: 1px solid #DADCE8; position: sticky; left: 0; z-index: 1; font-variant-numeric: tabular-nums; background: #F4F5F9; ';
+    var CELL = 'box-sizing: border-box; padding: 0 10px; display: flex; align-items: center; min-height: 34px; border-right: 1px solid #EEF4F6; font-size: 13px; line-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; font-variant-numeric: tabular-nums; ';
+    var NUM = 'box-sizing: border-box; padding: 0 8px; display: flex; align-items: center; justify-content: flex-end; min-height: 34px; font-size: 11px; color: #74899B; border-right: 1px solid #DAE2E8; position: sticky; left: 0; z-index: 1; font-variant-numeric: tabular-nums; background: #F4F7F9; ';
     var head = cols.map(function (c) {
       var on = so.col === c.k;
       return { label: c.l, arrow: on ? (so.dir === 'desc' ? '↓' : '↑') : '', sort: on ? (so.dir === 'desc' ? 'descending' : 'ascending') : 'none',
-        cellStyle: 'box-sizing: border-box; display: flex; border-right: 1px solid #DADCE8; min-width: 0;',
-        btnStyle: FONT + 'flex-grow: 1; min-width: 0; min-height: 34px; display: flex; align-items: center; gap: 4px; padding: 0 10px; border: none; background: ' + (on ? '#E6E8F2' : 'transparent') + '; color: #474945; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; ' + (isNum(c) ? 'justify-content: flex-end;' : 'justify-content: flex-start;'),
-        arrowStyle: 'font-size: 12px; color: #24285D;',
+        cellStyle: 'box-sizing: border-box; display: flex; border-right: 1px solid #DAE2E8; min-width: 0;',
+        btnStyle: FONT + 'flex-grow: 1; min-width: 0; min-height: 34px; display: flex; align-items: center; gap: 4px; padding: 0 10px; border: none; background: ' + (on ? '#E6EEF2' : 'transparent') + '; color: #474945; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; ' + (isNum(c) ? 'justify-content: flex-end;' : 'justify-content: flex-start;'),
+        arrowStyle: 'font-size: 12px; color: #245A8A;',
         click: function () { var p = {}; p[sk] = on ? (so.dir === 'asc' ? { col: c.k, dir: 'desc' } : { col: null, dir: 'asc' }) : { col: c.k, dir: isNum(c) ? 'desc' : 'asc' }; self.setState(p); } };
     });
     var body = data.map(function (row, i) {
-      return { n: i + 1, style: rowBase + 'border-bottom: 1px solid #EEF0F6; background: #FFFFFF;',
+      return { n: i + 1, style: rowBase + 'border-bottom: 1px solid #EEF4F6; background: #FFFFFF;',
         cells: cols.map(function (c) {
           var v = row[c.k], locked = c.gated && hidden;
-          var color = locked ? '#8286A8' : c.t === 'trend' ? (v > 0 ? '#1D7A55' : v < 0 ? '#B3261E' : '#474945') : '#24285D';
+          var color = locked ? '#74899B' : c.t === 'trend' ? (v > 0 ? '#1D7A55' : v < 0 ? '#B3261E' : '#474945') : '#245A8A';
           return { text: locked ? 'Hidden by org' : fmtCell(c, v), bar: !!c.bar && !locked,
-            barStyle: 'position: absolute; top: 7px; bottom: 7px; left: 0; border-radius: 0 4px 4px 0; background: rgba(36,40,93,0.10); width: ' + Math.max(2, Math.round(v / (maxOf[c.k] || 1) * 100)) + '%;',
+            barStyle: 'position: absolute; top: 7px; bottom: 7px; left: 0; border-radius: 0 4px 4px 0; background: rgba(36,90,138,0.10); width: ' + Math.max(2, Math.round(v / (maxOf[c.k] || 1) * 100)) + '%;',
             style: CELL + (isNum(c) ? 'justify-content: flex-end; ' : '') + 'color: ' + color + '; font-weight: ' + ((c.t === 'trend' || c === first) ? '600' : '400') + ';' + (locked ? ' font-style: italic;' : '') };
         }) };
     });
@@ -188,30 +188,30 @@ class Component extends DCLogic {
     var stuck = open.filter(function (it) { return it.days >= PIPE_STUCK; });
     var stuckValue = stuck.reduce(function (a, it) { return a + it.value; }, 0);
     var money = function (v) { return pipeMoney(v, P.perYear); };
-    var PRI = { High: 'background: #FBEAE9; color: #B3261E;', Medium: 'background: #FEF3E6; color: #A34F00;', Low: 'background: #EEF7F2; color: #1D7A55;' };
+    var PRI = { High: 'background: #FBEAE9; color: #B3261E;', Medium: 'background: #FBF4E4; color: #8A6A22;', Low: 'background: #EEF7F2; color: #1D7A55;' };
     var TAG = 'display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px; font-size: 12px; line-height: 16px; font-weight: 600; white-space: nowrap; ';
     var ICON = 'display: inline-flex; align-items: center; gap: 3px; font-size: 12px; line-height: 16px; color: #474945; font-variant-numeric: tabular-nums;';
     var BTN = FONT + 'height: 32px; display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; box-sizing: border-box; ';
-    var avatar = function (o, size) { return 'width: ' + size + 'px; height: ' + size + 'px; flex-shrink: 0; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-family: Montserrat, sans-serif; font-size: ' + (size > 26 ? 12 : 10) + 'px; font-weight: 700; border: 2px solid #FFFFFF; box-sizing: border-box; ' + ['background: #24285D; color: #FFFFFF;', 'background: #F89624; color: #24285D;', 'background: #B6BBD9; color: #24285D;'][o % 3]; };
+    var avatar = function (o, size) { return 'width: ' + size + 'px; height: ' + size + 'px; flex-shrink: 0; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-family: Montserrat, sans-serif; font-size: ' + (size > 26 ? 12 : 10) + 'px; font-weight: 700; border: 2px solid #FFFFFF; box-sizing: border-box; ' + ['background: #245A8A; color: #FFFFFF;', 'background: #C69C46; color: #173A5C;', 'background: #B6CBD9; color: #245A8A;'][o % 3]; };
 
     var card = function (it) {
       var sel = s.plSel === it.id, c = pipeCounts(it.id), owner = P.team[it.owner] || P.team[0];
       var stale = it.days >= PIPE_STUCK && it.stage < last;
       return {
         id: it.id, name: it.name, sub: it.sub, value: money(it.value), pri: it.pri, priStyle: TAG + PRI[it.pri],
-        hasTag: !!it.tag, tag: it.tag || '', tagStyle: TAG + 'background: #F4F5F9; color: #24285D;',
+        hasTag: !!it.tag, tag: it.tag || '', tagStyle: TAG + 'background: #F4F7F9; color: #245A8A;',
         initials: owner.i, ownerName: owner.n, avatarStyle: avatar(it.owner, 24),
         date: it.date, dateLabel: P.dateLabel, notes: String(c.notes), files: String(c.files),
         daysText: it.days === 0 ? 'Today' : it.days + 'd', daysLabel: it.days === 0 ? 'Moved to this stage today' : it.days + ' days in this stage',
         daysStyle: ICON + (stale ? 'color: #B3261E; font-weight: 600;' : ''),
         iconStyle: ICON, open: sel, expanded: sel ? 'true' : 'false', nextStep: it.nextStep || 'Added from InGenius. Next step not set yet.',
         style: 'background: #FFFFFF; border-radius: 12px; display: flex; flex-direction: column; gap: 10px; padding: 12px; box-sizing: border-box; cursor: grab; ' +
-          (sel ? 'border: 1px solid #24285D; box-shadow: 0 6px 18px rgba(36,40,93,0.16);' : 'border: 1px solid #DADCE8; box-shadow: 0 1px 2px rgba(36,40,93,0.06);'),
+          (sel ? 'border: 1px solid #245A8A; box-shadow: 0 6px 18px rgba(36,90,138,0.16);' : 'border: 1px solid #DAE2E8; box-shadow: 0 1px 2px rgba(36,90,138,0.06);'),
         toggle: function () { self.setState({ plSel: sel ? null : it.id, plPop: null }); },
         hasBack: it.stage > 0, backLabel: '← ' + P.stages[Math.max(0, it.stage - 1)], back: function () { self.pipeMove(it, it.stage - 1); },
         hasFwd: it.stage < last, fwdLabel: (P.next[it.stage] || '') + ' →', fwd: function () { self.pipeMove(it, it.stage + 1); },
-        backStyle: BTN + 'border: 1px solid #DADCE8; background: #FFFFFF; color: #24285D;',
-        fwdStyle: BTN + 'border: 1px solid #24285D; background: #24285D; color: #FFFFFF;',
+        backStyle: BTN + 'border: 1px solid #DAE2E8; background: #FFFFFF; color: #245A8A;',
+        fwdStyle: BTN + 'border: 1px solid #245A8A; background: #245A8A; color: #FFFFFF;',
         dragStart: function (e) { self._plDrag = it.id; if (e && e.dataTransfer) { e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', it.id); } catch (err) {} } },
         dragEnd: function () { self._plDrag = null; }
       };
@@ -221,7 +221,7 @@ class Component extends DCLogic {
       days: function (a, b) { return b.days - a.days; },
       pri: function (a, b) { return ['High', 'Medium', 'Low'].indexOf(a.pri) - ['High', 'Medium', 'Low'].indexOf(b.pri); }
     };
-    var OPT = FONT + 'height: 34px; display: flex; align-items: center; gap: 10px; padding: 0 10px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; text-align: left; color: #24285D; ';
+    var OPT = FONT + 'height: 34px; display: flex; align-items: center; gap: 10px; padding: 0 10px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; text-align: left; color: #245A8A; ';
     var ICONBTN = 'width: 28px; height: 28px; border: none; border-radius: 8px; background: transparent; color: #474945; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0;';
     var colW = compact ? 272 : 0;
     var columns = P.stages.map(function (name, i) {
@@ -236,7 +236,7 @@ class Component extends DCLogic {
         dotStyle: 'width: 10px; height: 10px; border-radius: 999px; flex-shrink: 0; background: ' + PIPE_DOTS[i] + ';',
         cards: items.map(card), empty: items.length === 0,
         emptyText: s.plStuck || priOn.length || ownOn.length || q ? 'Nothing here matches your filters.' : 'Drop a ' + P.noun + ' here.',
-        style: 'background: #F4F5F9; border-radius: 16px; padding: 10px; display: flex; flex-direction: column; gap: 10px; box-sizing: border-box; box-shadow: none; transition: box-shadow 120ms; min-width: 0; ' + (compact ? 'width: ' + colW + 'px; flex-shrink: 0;' : ''),
+        style: 'background: #F4F7F9; border-radius: 16px; padding: 10px; display: flex; flex-direction: column; gap: 10px; box-sizing: border-box; box-shadow: none; transition: box-shadow 120ms; min-width: 0; ' + (compact ? 'width: ' + colW + 'px; flex-shrink: 0;' : ''),
         addLabel: '+ Add new ' + P.noun, addAria: 'Add a ' + P.noun + ' to ' + name, menuAria: name + ' options',
         addOpen: adding, draft: s.plDraft || '', addPh: P.Noun + ' name',
         onDraft: function (e) { self.setState({ plDraft: e && e.target ? e.target.value : '' }); },
@@ -248,16 +248,16 @@ class Component extends DCLogic {
           var it = { id: 'new' + (self.state.plAdded.length + 1), name: nm, sub: 'Added just now', value: 0, stage: i, pri: 'Medium', owner: 0, date: PIPE_TODAY, days: 0, tag: 'New' };
           self.setState({ plAdded: self.state.plAdded.concat([it]), plAdd: null, plDraft: '', plSel: it.id, log: self.addLog(P.Noun + ' added: ' + nm + ' (' + name + ')') });
         },
-        addBtnStyle: FONT + 'height: 38px; border: 1px dashed #8286A8; border-radius: 12px; background: transparent; color: #474945; font-size: 13px; font-weight: 600; cursor: pointer; width: 100%;',
+        addBtnStyle: FONT + 'height: 38px; border: 1px dashed #74899B; border-radius: 12px; background: transparent; color: #474945; font-size: 13px; font-weight: 600; cursor: pointer; width: 100%;',
         iconBtn: ICONBTN, menuOpen: menu, menuExpanded: menu ? 'true' : 'false',
         toggleMenu: function () { self.setState({ plPop: menu ? null : 'col' + i }); },
         sortOpts: [['pri', 'Sort by priority'], ['value', 'Sort by value'], ['days', 'Sort by days in stage']].map(function (o) {
           var on = o[0] === mode;
-          return { label: o[1], pressed: on ? 'true' : 'false', style: OPT + (on ? 'background: #F4F5F9; font-weight: 600;' : 'background: transparent;'),
+          return { label: o[1], pressed: on ? 'true' : 'false', style: OPT + (on ? 'background: #F4F7F9; font-weight: 600;' : 'background: transparent;'),
             pick: function () { var cs = Object.assign({}, self.state.plColSort); cs[i] = o[0]; self.setState({ plColSort: cs, plPop: null }); } };
         }),
-        menuStyle: 'position: absolute; z-index: 12; top: 36px; right: 0; width: 220px; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 10px; padding: 6px; display: flex; flex-direction: column; gap: 2px; box-shadow: 0 8px 24px rgba(36,40,93,0.16);',
-        dragOver: function (e) { if (!self._plDrag) return; if (e && e.preventDefault) e.preventDefault(); if (e && e.currentTarget && e.currentTarget.style) e.currentTarget.style.boxShadow = 'inset 0 0 0 2px #24285D'; },
+        menuStyle: 'position: absolute; z-index: 12; top: 36px; right: 0; width: 220px; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DAE2E8; border-radius: 10px; padding: 6px; display: flex; flex-direction: column; gap: 2px; box-shadow: 0 8px 24px rgba(36,90,138,0.16);',
+        dragOver: function (e) { if (!self._plDrag) return; if (e && e.preventDefault) e.preventDefault(); if (e && e.currentTarget && e.currentTarget.style) e.currentTarget.style.boxShadow = 'inset 0 0 0 2px #245A8A'; },
         dragLeave: clearHi,
         drop: function (e) {
           if (e && e.preventDefault) e.preventDefault(); clearHi(e);
@@ -274,7 +274,7 @@ class Component extends DCLogic {
     if (ownOn.length) pills.push({ label: 'Owner', value: ownOn.map(function (o) { return P.team[o].n; }).join(', '), clear: function () { self.setState({ plOwn: {} }); } });
     if (s.plStuck) pills.push({ label: 'Genie', value: 'In one stage ' + PIPE_STUCK + '+ days', clear: function () { self.setState({ plStuck: false, plBanner: null }); } });
     var toggleIn = function (key, k) { return function () { var o = Object.assign({}, self.state[key]); o[k] = !o[k]; var p = {}; p[key] = o; self.setState(p); }; };
-    var chk = function (on) { return FONT + 'height: 32px; display: flex; align-items: center; gap: 8px; padding: 0 10px; border-radius: 8px; font-size: 13px; cursor: pointer; ' + (on ? 'border: 1px solid #24285D; background: #24285D; color: #FFFFFF; font-weight: 600;' : 'border: 1px solid #DADCE8; background: #FFFFFF; color: #24285D;'); };
+    var chk = function (on) { return FONT + 'height: 32px; display: flex; align-items: center; gap: 8px; padding: 0 10px; border-radius: 8px; font-size: 13px; cursor: pointer; ' + (on ? 'border: 1px solid #245A8A; background: #245A8A; color: #FFFFFF; font-weight: 600;' : 'border: 1px solid #DAE2E8; background: #FFFFFF; color: #245A8A;'); };
     var filterCount = priOn.length + ownOn.length + (s.plStuck ? 1 : 0);
 
     // List view: the same items as a sortable table.
@@ -290,7 +290,7 @@ class Component extends DCLogic {
     var viewBtn = function (id, label) {
       var on = (s.plView || 'board') === id;
       return { label: label, pressed: on ? 'true' : 'false', go: function () { self.setState({ plView: id, plPop: null, rSort: { col: null, dir: 'asc' } }); },
-        style: FONT + 'height: 34px; display: flex; align-items: center; gap: 6px; padding: 0 14px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; ' + (on ? 'background: #FFFFFF; color: #24285D; box-shadow: 0 1px 3px rgba(36,40,93,0.14);' : 'background: transparent; color: #474945;') };
+        style: FONT + 'height: 34px; display: flex; align-items: center; gap: 6px; padding: 0 14px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; ' + (on ? 'background: #FFFFFF; color: #245A8A; box-shadow: 0 1px 3px rgba(36,90,138,0.14);' : 'background: transparent; color: #474945;') };
     };
     var view = s.plView || 'board';
     var genieText = stuck.length
@@ -300,22 +300,22 @@ class Component extends DCLogic {
       pl: { noun: P.noun, nouns: P.nouns, Noun: P.Noun },
       plIsBoard: view === 'board', plIsList: view === 'list', plIsActivity: view === 'activity',
       plViews: [viewBtn('board', 'Board'), viewBtn('list', 'List'), viewBtn('activity', 'Activity')],
-      plViewsStyle: 'display: flex; gap: 2px; padding: 3px; border-radius: 10px; background: #E6E8F2;',
+      plViewsStyle: 'display: flex; gap: 2px; padding: 3px; border-radius: 10px; background: #E6EEF2;',
       plCountTag: open.length + ' open ' + (open.length === 1 ? P.noun : P.nouns),
       plSummary: money(openValue) + ' in the pipeline · ' + all.filter(function (it) { return it.stage === last; }).length + ' ' + P.stages[last].toLowerCase() + ' this quarter',
       plTeam: P.team.map(function (t, i) { return { i: t.i, n: t.n, style: avatar(i, 32) + (i ? 'margin-left: -4px;' : '') }; }),
       plAddLabel: 'Add ' + P.noun, plAddTop: function () { self.setState({ plView: 'board', plAdd: 0, plDraft: '', plPop: null }); },
-      plAddStyle: BTN + 'height: 36px; border: 1px solid #24285D; background: #24285D; color: #FFFFFF;',
+      plAddStyle: BTN + 'height: 36px; border: 1px solid #245A8A; background: #245A8A; color: #FFFFFF;',
       plShare: function () { self.setState({ plBanner: { title: 'Link copied.', text: 'Anyone on your team with access to this ' + (P.noun === 'deal' ? 'pipeline' : 'recruiting pipeline') + ' can open it.' } }); },
-      plShareStyle: BTN + 'height: 36px; border: 1px solid #DADCE8; background: #FFFFFF; color: #24285D;',
+      plShareStyle: BTN + 'height: 36px; border: 1px solid #DAE2E8; background: #FFFFFF; color: #245A8A;',
       plFiltersLabel: filterCount ? 'Filters · ' + filterCount : 'Filters',
       plFiltersOpen: s.plPop === 'filters', plFiltersAttr: s.plPop === 'filters' ? 'true' : 'false',
       plToggleFilters: function () { self.setState({ plPop: s.plPop === 'filters' ? null : 'filters' }); },
-      plFiltersStyle: BTN + 'height: 36px; ' + (filterCount ? 'border: 1px solid #24285D; background: #EEF0F8; color: #24285D;' : 'border: 1px solid #DADCE8; background: #FFFFFF; color: #24285D;'),
+      plFiltersStyle: BTN + 'height: 36px; ' + (filterCount ? 'border: 1px solid #245A8A; background: #EEF5F8; color: #245A8A;' : 'border: 1px solid #DAE2E8; background: #FFFFFF; color: #245A8A;'),
       plPriOpts: ['High', 'Medium', 'Low'].map(function (p) { var on = !!s.plPri[p]; return { label: p, pressed: on ? 'true' : 'false', style: chk(on), toggle: toggleIn('plPri', p) }; }),
       plOwnOpts: P.team.map(function (t, i) { var on = !!s.plOwn[i]; return { label: t.n, pressed: on ? 'true' : 'false', style: chk(on), toggle: toggleIn('plOwn', i) }; }),
       plStuckOpt: { label: 'In one stage ' + PIPE_STUCK + '+ days', pressed: s.plStuck ? 'true' : 'false', style: chk(s.plStuck), toggle: function () { self.setState({ plStuck: !s.plStuck }); } },
-      plPopStyle: 'position: absolute; z-index: 14; top: 42px; right: 0; width: ' + (compact ? '100%' : '340px') + '; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 8px 24px rgba(36,40,93,0.16);',
+      plPopStyle: 'position: absolute; z-index: 14; top: 42px; right: 0; width: ' + (compact ? '100%' : '340px') + '; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DAE2E8; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 8px 24px rgba(36,90,138,0.16);',
       plClearAll: function () { self.setState({ plPri: {}, plOwn: {}, plStuck: false, plQ: '', plBanner: null }); },
       plHasPills: pills.length > 0, plPills: pills,
       plQ: s.plQ || '', plOnSearch: function (e) { self.setState({ plQ: e && e.target ? e.target.value : '' }); },
@@ -332,12 +332,12 @@ class Component extends DCLogic {
         : 'display: grid; gap: 14px; grid-template-columns: repeat(' + P.stages.length + ', minmax(0, 1fr)); align-items: start;',
       plNone: shown.length === 0,
       plTableTitle: 'All ' + P.nouns, plCount: rows.length + ' of ' + all.length,
-      plTableCard: 'background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; box-sizing: border-box; ' + (compact ? 'padding: 14px;' : 'padding: 18px 20px;'),
-      plScroll: 'border: 1px solid #DADCE8; border-radius: 8px; overflow: auto; max-height: ' + (compact ? '460px' : '560px') + '; background: #FFFFFF;',
-      plHeadRow: tb.rowBase + 'position: sticky; top: 0; z-index: 2; background: #F4F5F9; border-bottom: 1px solid #DADCE8;',
+      plTableCard: 'background: #FFFFFF; border: 1px solid #DAE2E8; border-radius: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; box-sizing: border-box; ' + (compact ? 'padding: 14px;' : 'padding: 18px 20px;'),
+      plScroll: 'border: 1px solid #DAE2E8; border-radius: 8px; overflow: auto; max-height: ' + (compact ? '460px' : '560px') + '; background: #FFFFFF;',
+      plHeadRow: tb.rowBase + 'position: sticky; top: 0; z-index: 2; background: #F4F7F9; border-bottom: 1px solid #DAE2E8;',
       plNumHead: tb.NUM + 'z-index: 3;', plNumCell: tb.NUM, plNumFoot: tb.NUM,
       plHead: tb.head, plRows: tb.body, plRowCount: String(rows.length + 2),
-      plFootRow: tb.rowBase + 'position: sticky; bottom: 0; z-index: 2; background: #F4F5F9; border-top: 1px solid #DADCE8;',
+      plFootRow: tb.rowBase + 'position: sticky; bottom: 0; z-index: 2; background: #F4F7F9; border-top: 1px solid #DAE2E8;',
       plFoot: tb.foot,
       plSync: d.sync
     };
@@ -358,9 +358,9 @@ class Component extends DCLogic {
       var v = !!on[k], isDefault = !!HOME_DEFAULTS[s.persona][k];
       return { name: names[k], desc: descs[k], checked: v ? 'true' : 'false', hint: isDefault ? 'Default for ' + d.role.toLowerCase() : '', hasHint: isDefault,
         toggle: function () { var w = Object.assign({}, self.homeWidgets()); w[k] = !w[k]; self.setState({ homeW: w }); },
-        style: FONT + 'display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border-radius: 10px; cursor: pointer; text-align: left; color: #24285D; box-sizing: border-box; ' + (v ? 'border: 1px solid #24285D; background: #F4F5F9;' : 'border: 1px solid #DADCE8; background: #FFFFFF;'),
-        trackStyle: 'width: 36px; height: 20px; border-radius: 999px; flex-shrink: 0; position: relative; box-sizing: border-box; ' + (v ? 'background: #24285D;' : 'background: #DADCE8;'),
-        knobStyle: 'position: absolute; top: 2px; width: 16px; height: 16px; border-radius: 999px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(21,24,58,0.3); ' + (v ? 'left: 18px;' : 'left: 2px;') };
+        style: FONT + 'display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border-radius: 10px; cursor: pointer; text-align: left; color: #245A8A; box-sizing: border-box; ' + (v ? 'border: 1px solid #245A8A; background: #F4F7F9;' : 'border: 1px solid #DAE2E8; background: #FFFFFF;'),
+        trackStyle: 'width: 36px; height: 20px; border-radius: 999px; flex-shrink: 0; position: relative; box-sizing: border-box; ' + (v ? 'background: #245A8A;' : 'background: #DAE2E8;'),
+        knobStyle: 'position: absolute; top: 2px; width: 16px; height: 16px; border-radius: 999px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(21,41,58,0.3); ' + (v ? 'left: 18px;' : 'left: 2px;') };
     });
 
     // LO movement widget: the same moves as the report, summarized, with a mini Sankey.
@@ -378,12 +378,12 @@ class Component extends DCLogic {
     var mineFirst = moves.slice().sort(function (a, b) { var ha = home && (a.to === home || a.from === home) ? 0 : 1, hb = home && (b.to === home || b.from === home) ? 0 : 1; return ha - hb || a.m - b.m || b.units - a.units; });
     var recent = mineFirst.slice(0, compact ? 4 : 6).map(function (mv) {
       var hired = home && mv.to === home, lost = home && mv.from === home;
-      var tone = hired ? '#1D7A55' : lost ? '#B3261E' : '#8286A8';
+      var tone = hired ? '#1D7A55' : lost ? '#B3261E' : '#74899B';
       return { name: mv.name, from: mv.from, to: mv.to, units: String(mv.units), when: FLOW_MONTHS[mv.m].replace(' 20', ' ’'),
         dot: 'width: 8px; height: 8px; border-radius: 999px; flex-shrink: 0; background: ' + tone + ';',
-        fromStyle: CELLT + (lost ? 'font-weight: 600; color: #B3261E;' : 'color: #24285D;'),
-        toStyle: CELLT + (hired ? 'font-weight: 600; color: #1D7A55;' : 'color: #24285D;'),
-        row: 'display: grid; ' + COLS + ' gap: 10px; align-items: center; padding: 9px 0; border-top: 1px solid #EEF0F6; font-size: 13px; line-height: 18px;' };
+        fromStyle: CELLT + (lost ? 'font-weight: 600; color: #B3261E;' : 'color: #245A8A;'),
+        toStyle: CELLT + (hired ? 'font-weight: 600; color: #1D7A55;' : 'color: #245A8A;'),
+        row: 'display: grid; ' + COLS + ' gap: 10px; align-items: center; padding: 9px 0; border-top: 1px solid #EEF4F6; font-size: 13px; line-height: 18px;' };
     });
     var openFlow = function () { self.setState({ tab: 'reports', reportId: 'flow', rFilters: [], rSort: { col: null, dir: 'asc' }, rSearch: '', rAdd: false, rEdit: null, rBanner: null, rHoverBin: null, flowFocus: null, flowHover: null, flowPop: null, aiPop: false, homeEdit: false }); };
 
@@ -396,9 +396,9 @@ class Component extends DCLogic {
         dot: 'width: 10px; height: 10px; border-radius: 999px; flex-shrink: 0; background: ' + PIPE_DOTS[i] + ';',
         seg: 'height: 100%; background: ' + PIPE_DOTS[i] + '; width: ' + (its.length / totalN * 100).toFixed(2) + '%;' + (its.length ? '' : ' display: none;') };
     });
-    var CARD = 'background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 16px; display: flex; flex-direction: column; min-width: 0; box-sizing: border-box; ' + (compact ? 'padding: 16px; gap: 12px;' : 'padding: 20px 24px; gap: 14px;');
-    var BODY = FONT + 'display: flex; flex-direction: column; gap: 14px; width: 100%; padding: 0; margin: 0; border: none; background: transparent; text-align: left; cursor: pointer; color: #24285D;';
-    var LINK = FONT + 'height: 32px; display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; border: 1px solid #24285D; border-radius: 8px; background: #FFFFFF; color: #24285D; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;';
+    var CARD = 'background: #FFFFFF; border: 1px solid #DAE2E8; border-radius: 16px; display: flex; flex-direction: column; min-width: 0; box-sizing: border-box; ' + (compact ? 'padding: 16px; gap: 12px;' : 'padding: 20px 24px; gap: 14px;');
+    var BODY = FONT + 'display: flex; flex-direction: column; gap: 14px; width: 100%; padding: 0; margin: 0; border: none; background: transparent; text-align: left; cursor: pointer; color: #245A8A;';
+    var LINK = FONT + 'height: 32px; display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; border: 1px solid #245A8A; border-radius: 8px; background: #FFFFFF; color: #245A8A; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;';
     return {
       hw: on, homeCount: count + ' of ' + HOME_WIDGETS.length + ' widgets',
       homeEdit: !!s.homeEdit, homeEditAttr: s.homeEdit ? 'true' : 'false',
@@ -407,8 +407,8 @@ class Component extends DCLogic {
       homeResetLabel: 'Reset to ' + d.role.toLowerCase() + ' defaults',
       homeOpts: opts, homeNone: count === 0,
       homeBarStyle: 'position: relative; display: flex; align-items: center; z-index: 20;',
-      homeEditBtn: FONT + 'height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid #DADCE8; border-radius: 999px; font-size: 14px; font-weight: 600; cursor: pointer; box-sizing: border-box; ' + (compact ? 'width: 40px; padding: 0;' : 'padding: 0 14px;') + (s.homeEdit ? 'background: #24285D; color: #FFFFFF; border-color: #24285D;' : 'background: #FFFFFF; color: #24285D;'),
-      homePanelStyle: 'position: absolute; z-index: 30; top: 48px; right: ' + (compact ? '-100px' : '0') + '; width: ' + (compact ? '358px' : '380px') + '; max-height: ' + (compact ? '640px' : '760px') + '; overflow-y: auto; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 12px 32px rgba(36,40,93,0.18);',
+      homeEditBtn: FONT + 'height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid #DAE2E8; border-radius: 999px; font-size: 14px; font-weight: 600; cursor: pointer; box-sizing: border-box; ' + (compact ? 'width: 40px; padding: 0;' : 'padding: 0 14px;') + (s.homeEdit ? 'background: #245A8A; color: #FFFFFF; border-color: #245A8A;' : 'background: #FFFFFF; color: #245A8A;'),
+      homePanelStyle: 'position: absolute; z-index: 30; top: 48px; right: ' + (compact ? '-100px' : '0') + '; width: ' + (compact ? '358px' : '380px') + '; max-height: ' + (compact ? '640px' : '760px') + '; overflow-y: auto; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DAE2E8; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 12px 32px rgba(36,90,138,0.18);',
       hmCard: CARD, hmBody: BODY, hmLink: LINK,
       hmMoveStats: stats, hmMoveRecent: recent, hmMoveHead: 'display: grid; ' + COLS + ' gap: 10px; padding: 0 0 6px; font-size: 11px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #474945;',
       hmMoveStatRow: 'display: grid; gap: 10px; grid-template-columns: repeat(3, minmax(0, 1fr));',
@@ -436,8 +436,8 @@ class Component extends DCLogic {
       var c = mm.cls[i], dim = (show === 'top' && c !== 4) || (show === 'low' && c !== 0);
       var on = r.id === hov, picked = r.id === sel;
       return { d: r.d, aria: label(r) + ': ' + mapFmt(mk, mm.vals[i]),
-        fill: dim ? '#F4F5F9' : RAMP[c],
-        stroke: picked || on ? '#F89624' : '#FFFFFF',
+        fill: dim ? '#F4F7F9' : RAMP[c],
+        stroke: picked || on ? '#C69C46' : '#FFFFFF',
         sw: picked ? '2.5' : on ? '2' : '0.75',
         hover: function () { if (self.state.mapHover !== r.id) self.setState({ mapHover: r.id }); },
         click: function () {
@@ -462,7 +462,7 @@ class Component extends DCLogic {
     if (ms.st) crumbs.push({ label: stateName(ms.st), go: function () { self.setState({ mapCo: null, mapSel: null, mapHover: null, mapNote: null, rSearch: '', rSort: { col: null, dir: 'asc' } }); } });
     if (level === 'co') crumbs.push({ label: mm.name, go: function () { self.setState({ mapSel: null }); } });
     crumbs = crumbs.map(function (c, i) { var last = i === crumbs.length - 1; return { label: c.label, go: c.go, sep: i > 0, current: last ? 'page' : 'false',
-      style: FONT + 'border: none; background: transparent; padding: 0 2px; font-size: 13px; cursor: pointer; ' + (last ? 'color: #24285D; font-weight: 600;' : 'color: #474945; text-decoration: underline;') }; });
+      style: FONT + 'border: none; background: transparent; padding: 0 2px; font-size: 13px; cursor: pointer; ' + (last ? 'color: #245A8A; font-weight: 600;' : 'color: #474945; text-decoration: underline;') }; });
 
     var order = fr.r.map(function (x, i) { return i; }).sort(function (a, b) { return mm.vals[b] - mm.vals[a]; });
     var ti = order[0];
@@ -486,7 +486,7 @@ class Component extends DCLogic {
       var main = k === mk, v = main ? mm.here : avgOf(k);
       return { label: MAP_METRICS[k].l, value: mapFmt(k, v),
         sub: main && level !== 'us' ? mapDiff(mk, mm.here, mm.parent) + ' vs ' + (level === 'st' ? 'US' : stateName(ms.st)) : main ? 'Mapped' : '',
-        labelStyle: 'flex-grow: 1; min-width: 0; font-size: 13px; line-height: 18px; ' + (main ? 'font-weight: 600; color: #24285D;' : 'color: #474945;'),
+        labelStyle: 'flex-grow: 1; min-width: 0; font-size: 13px; line-height: 18px; ' + (main ? 'font-weight: 600; color: #245A8A;' : 'color: #474945;'),
         subStyle: 'font-size: 12px; line-height: 16px; color: #474945; white-space: nowrap; width: 116px; flex-shrink: 0; text-align: right;' };
     });
     var counts = [0, 0, 0, 0, 0]; mm.cls.forEach(function (c) { counts[c]++; });
@@ -495,7 +495,7 @@ class Component extends DCLogic {
       else if (level === 'st' && IG_GEO.co[r.id]) self.setState({ mapCo: r.id, mapSel: null, mapHover: null, mapNote: null, rSearch: '', rSort: { col: null, dir: 'asc' } });
       else self.setState({ mapSel: r.id, mapHover: null });
     }; };
-    var ROW = FONT + 'display: flex; align-items: center; gap: 10px; width: 100%; min-height: 32px; padding: 0 8px; border: none; border-radius: 8px; background: transparent; color: #24285D; font-size: 13px; cursor: pointer;';
+    var ROW = FONT + 'display: flex; align-items: center; gap: 10px; width: 100%; min-height: 32px; padding: 0 8px; border: none; border-radius: 8px; background: transparent; color: #245A8A; font-size: 13px; cursor: pointer;';
     var item = function (i, rank) { var r = fr.r[i]; return { rank: String(rank), name: label(r), value: mapFmt(mk, mm.vals[i]), go: drillTo(r), style: ROW,
       sw: 'width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; background: ' + RAMP[mm.cls[i]] + ';' }; };
     var topN = compact ? 3 : 5;
@@ -541,28 +541,28 @@ class Component extends DCLogic {
     var lsd = lso.col ? (lso.dir === 'desc' ? -1 : 1) : -1;
     lrows = lrows.slice().sort(function (a, b) { var x = a[lsc], y = b[lsc]; return (x > y ? 1 : x < y ? -1 : 0) * lsd; });
     var ltb = this.gridParts(lcols, lrows, tbl.los, false, 'loSort');
-    var PILL = FONT + 'height: 30px; display: flex; align-items: center; gap: 6px; padding: 0 10px; border-radius: 8px; font-size: 13px; cursor: pointer; box-sizing: border-box; color: #24285D; background: #F4F5F9; border: 1px solid #DADCE8;';
+    var PILL = FONT + 'height: 30px; display: flex; align-items: center; gap: 6px; padding: 0 10px; border-radius: 8px; font-size: 13px; cursor: pointer; box-sizing: border-box; color: #245A8A; background: #F4F7F9; border: 1px solid #DAE2E8;';
     var showLabels = { all: 'All ' + noun, top: 'Top fifth only', low: 'Bottom fifth only' };
     return {
       rTableTitle: 'Lenders and brokers in ' + scopeName, rTableDesc: 'Loans originated in this area in the last 12 months. Sorted by loans until you pick a column.',
       hasLoTable: true, loTableTitle: 'Loan officers in ' + scopeName, loTableDesc: 'LOs with loans in this area in the last 12 months.',
       loSearchVal: s.loSearch || '', loOnSearch: function (e) { self.setState({ loSearch: e && e.target ? e.target.value : '' }); },
       loCount: lrows.length + ' of ' + tbl.los.length, loRowCount: String(lrows.length + 2),
-      loHeadRow: ltb.rowBase + 'position: sticky; top: 0; z-index: 2; background: #F4F5F9; border-bottom: 1px solid #DADCE8;',
-      loFootRow: ltb.rowBase + 'position: sticky; bottom: 0; z-index: 2; background: #F4F5F9; border-top: 1px solid #DADCE8;',
+      loHeadRow: ltb.rowBase + 'position: sticky; top: 0; z-index: 2; background: #F4F7F9; border-bottom: 1px solid #DAE2E8;',
+      loFootRow: ltb.rowBase + 'position: sticky; bottom: 0; z-index: 2; background: #F4F7F9; border-top: 1px solid #DAE2E8;',
       loNum: ltb.NUM, loNumHead: ltb.NUM + 'z-index: 3;', loHead: ltb.head, loRows: ltb.body, loFoot: ltb.foot, loNone: lrows.length === 0,
-      rTableCard: 'background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; box-sizing: border-box; ' + (compact ? 'padding: 14px;' : 'padding: 18px 20px;'),
+      rTableCard: 'background: #FFFFFF; border: 1px solid #DAE2E8; border-radius: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; box-sizing: border-box; ' + (compact ? 'padding: 14px;' : 'padding: 18px 20px;'),
       rSearchVal: s.rSearch || '',
       rOnSearch: function (e) { self.setState({ rSearch: e && e.target ? e.target.value : '' }); },
       rCount: trows.length + ' of ' + allRows.length,
       rRowCount: String(trows.length + 2),
-      rScroll: 'border: 1px solid #DADCE8; border-radius: 8px; overflow: auto; max-height: ' + (compact ? '380px' : '420px') + '; background: #FFFFFF;',
-      rHeadRow: tb.rowBase + 'position: sticky; top: 0; z-index: 2; background: #F4F5F9; border-bottom: 1px solid #DADCE8;',
+      rScroll: 'border: 1px solid #DAE2E8; border-radius: 8px; overflow: auto; max-height: ' + (compact ? '380px' : '420px') + '; background: #FFFFFF;',
+      rHeadRow: tb.rowBase + 'position: sticky; top: 0; z-index: 2; background: #F4F7F9; border-bottom: 1px solid #DAE2E8;',
       rNumHead: tb.NUM + 'z-index: 3;', rNumCell: tb.NUM, rNumFoot: tb.NUM,
       rHead: tb.head, rRows: tb.body, rNone: trows.length === 0,
       rNoneHint: 'No lenders match your search.',
       rFix: function () { self.setState({ rSearch: '' }); },
-      rFootRow: tb.rowBase + 'position: sticky; bottom: 0; z-index: 2; background: #F4F5F9; border-top: 1px solid #DADCE8;',
+      rFootRow: tb.rowBase + 'position: sticky; bottom: 0; z-index: 2; background: #F4F7F9; border-top: 1px solid #DAE2E8;',
       rFoot: tb.foot,
       mapW: fr.w, mapH: fr.h, mapViewBox: '0 0 ' + fr.w + ' ' + fr.h,
       mapRegions: regions, mapReadout: readout, mapCrumbs: crumbs,
@@ -577,9 +577,9 @@ class Component extends DCLogic {
       mapToggleMetric: function () { self.setState({ mapPop: s.mapPop === 'metric' ? null : 'metric' }); },
       mapToggleShow: function () { self.setState({ mapPop: s.mapPop === 'show' ? null : 'show' }); },
       mapMetricOpts: cfg.metrics.map(function (k) { var on = k === mk; return { label: MAP_METRICS[k].l, pressed: on ? 'true' : 'false', pick: function () { self.setState({ mapMetric: k, mapPop: null }); },
-        style: FONT + 'height: 34px; display: flex; align-items: center; gap: 10px; padding: 0 10px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; text-align: left; color: #24285D; ' + (on ? 'background: #F4F5F9; font-weight: 600;' : 'background: transparent;') }; }),
+        style: FONT + 'height: 34px; display: flex; align-items: center; gap: 10px; padding: 0 10px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; text-align: left; color: #245A8A; ' + (on ? 'background: #F4F7F9; font-weight: 600;' : 'background: transparent;') }; }),
       mapShowOpts: ['all', 'top', 'low'].map(function (k) { var on = k === show; return { label: showLabels[k], pressed: on ? 'true' : 'false', pick: function () { self.setState({ mapShow: k, mapPop: null }); },
-        style: FONT + 'height: 34px; display: flex; align-items: center; gap: 10px; padding: 0 10px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; text-align: left; color: #24285D; ' + (on ? 'background: #F4F5F9; font-weight: 600;' : 'background: transparent;') }; }),
+        style: FONT + 'height: 34px; display: flex; align-items: center; gap: 10px; padding: 0 10px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; text-align: left; color: #245A8A; ' + (on ? 'background: #F4F7F9; font-weight: 600;' : 'background: transparent;') }; }),
       mapUp: function () { var rs = { rSearch: '', rSort: { col: null, dir: 'asc' } }; if (level === 'co') self.setState(Object.assign({ mapCo: null, mapSel: null, mapHover: null }, rs)); else if (level === 'st') self.setState(Object.assign({ mapSt: null, mapCo: null, mapSel: null, mapHover: null, mapNote: null }, rs)); },
       mapCanUp: level !== 'us',
       mapLeave: function () { if (self.state.mapHover) self.setState({ mapHover: null }); },
@@ -597,9 +597,9 @@ class Component extends DCLogic {
       rDismiss: function () { self.setState({ rBanner: null }); },
       rUndo: function () {},
       rKpiRow: 'display: grid; gap: 12px; grid-template-columns: repeat(' + (compact ? 2 : 4) + ', minmax(0, 1fr));',
-      rKpiCard: 'background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 16px; padding: ' + (compact ? '12px 14px' : '14px 18px') + '; display: flex; flex-direction: column; gap: 2px; min-width: 0;',
-      rPopStyle: 'position: absolute; z-index: 12; top: 38px; left: 0; width: ' + (compact ? '100%' : '300px') + '; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 2px; box-shadow: 0 8px 24px rgba(36,40,93,0.16);',
-      rChartCard: 'background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; box-sizing: border-box; ' + (compact ? 'padding: 14px;' : 'padding: 18px 20px;')
+      rKpiCard: 'background: #FFFFFF; border: 1px solid #DAE2E8; border-radius: 16px; padding: ' + (compact ? '12px 14px' : '14px 18px') + '; display: flex; flex-direction: column; gap: 2px; min-width: 0;',
+      rPopStyle: 'position: absolute; z-index: 12; top: 38px; left: 0; width: ' + (compact ? '100%' : '300px') + '; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DAE2E8; border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 2px; box-shadow: 0 8px 24px rgba(36,90,138,0.16);',
+      rChartCard: 'background: #FFFFFF; border: 1px solid #DAE2E8; border-radius: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; box-sizing: border-box; ' + (compact ? 'padding: 14px;' : 'padding: 18px 20px;')
     };
   }
   // Shared Sankey output: ribbons, node bars and HTML labels positioned over the SVG.
@@ -618,7 +618,7 @@ class Component extends DCLogic {
       var pos = n.first ? 'right: ' + ((W - n.x + 6) / W * 100).toFixed(2) + '%; text-align: right;' : 'left: ' + ((n.x + lay.nodeW + 6) / W * 100).toFixed(2) + '%; text-align: left;';
       return { name: n.label, value: fmt(n.v), pressed: 'false',
         click: function () { if (clickNode) clickNode(n, false); },
-        style: FONT + 'position: absolute; top: ' + cy.toFixed(2) + '%; transform: translateY(-50%); ' + pos + ' display: flex; flex-direction: column; gap: 0; padding: 2px 4px; border: none; border-radius: 4px; background: ' + (n.first || n.last ? 'transparent' : 'rgba(255,255,255,0.72)') + '; color: #24285D; line-height: 1.25; font-size: ' + (compact ? '10px' : '12px') + '; font-weight: 600; max-width: ' + (n.first ? 22 : 30) + '%; cursor: ' + (can ? 'pointer' : 'default') + ';' };
+        style: FONT + 'position: absolute; top: ' + cy.toFixed(2) + '%; transform: translateY(-50%); ' + pos + ' display: flex; flex-direction: column; gap: 0; padding: 2px 4px; border: none; border-radius: 4px; background: ' + (n.first || n.last ? 'transparent' : 'rgba(255,255,255,0.72)') + '; color: #245A8A; line-height: 1.25; font-size: ' + (compact ? '10px' : '12px') + '; font-weight: 600; max-width: ' + (n.first ? 22 : 30) + '%; cursor: ' + (can ? 'pointer' : 'default') + ';' };
     });
     var hl = null; lay.links.forEach(function (l) { if (l.s + '→' + l.t === hov) hl = l; });
     return { flowLinks: links, flowNodes: nodes, flowLabels: labels, flowViewBox: '0 0 ' + W + ' ' + (H + 4), hl: hl,
@@ -686,12 +686,12 @@ class Component extends DCLogic {
     var sd = s.rSort.col ? (s.rSort.dir === 'desc' ? -1 : 1) : 1;
     if (sc === 'when') sc = 'm', sd = -sd;
     trows = trows.slice().sort(function (a, b) { var x = a[sc], y = b[sc]; return (x > y ? 1 : x < y ? -1 : 0) * sd; });
-    var OPT = FONT + 'height: 34px; display: flex; align-items: center; gap: 10px; padding: 0 10px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; text-align: left; color: #24285D; ';
-    var opts = function (list, cur, key) { return list.map(function (o) { var on = o[0] === cur; return { label: o[1], pressed: on ? 'true' : 'false', style: OPT + (on ? 'background: #F4F5F9; font-weight: 600;' : 'background: transparent;'),
+    var OPT = FONT + 'height: 34px; display: flex; align-items: center; gap: 10px; padding: 0 10px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; text-align: left; color: #245A8A; ';
+    var opts = function (list, cur, key) { return list.map(function (o) { var on = o[0] === cur; return { label: o[1], pressed: on ? 'true' : 'false', style: OPT + (on ? 'background: #F4F7F9; font-weight: 600;' : 'background: transparent;'),
       pick: function () { var p = { flowPop: null, flowHover: null }; p[key] = o[0]; self.setState(p); } }; }); };
     var dirBtn = function (id, label) { var on = dir === id; return { label: label, pressed: on ? 'true' : 'false', go: function () { self.setState({ flowDir: id, flowHover: null, rSearch: '', rSort: { col: null, dir: 'asc' } }); },
-      style: FONT + 'height: 32px; padding: 0 14px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; ' + (on ? 'background: #FFFFFF; color: #24285D; box-shadow: 0 1px 3px rgba(36,40,93,0.14);' : 'background: transparent; color: #474945;') }; };
-    var ROWS = function (clickable) { return FONT + 'display: flex; align-items: center; gap: 10px; width: 100%; min-height: 32px; padding: 0 8px; border: none; border-radius: 8px; background: transparent; color: #24285D; font-size: 13px; cursor: ' + (clickable ? 'pointer;' : 'default;'); };
+      style: FONT + 'height: 32px; padding: 0 14px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; ' + (on ? 'background: #FFFFFF; color: #245A8A; box-shadow: 0 1px 3px rgba(36,90,138,0.14);' : 'background: transparent; color: #474945;') }; };
+    var ROWS = function (clickable) { return FONT + 'display: flex; align-items: center; gap: 10px; width: 100%; min-height: 32px; padding: 0 8px; border: none; border-radius: 8px; background: transparent; color: #245A8A; font-size: 13px; cursor: ' + (clickable ? 'pointer;' : 'default;'); };
     var barOf = function (v, max, col) { return 'display: block; height: 100%; border-radius: 999px; background: ' + col + '; width: ' + Math.max(4, Math.round(v / (max || 1) * 100)) + '%;'; };
     var swOf = function (col) { return 'width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; background: ' + col + ';'; };
     var maxO = otherKeys.length ? others[otherKeys[0]] : 1, mkSorted = mkKeys.slice().sort(function (a, b) { return mk[b] - mk[a]; }), maxM = mkSorted.length ? mk[mkSorted[0]] : 1;
@@ -775,10 +775,10 @@ class Component extends DCLogic {
       { k: 'share', l: 'Share of ' + R.who.toLowerCase(), t: 'pct', w: 170 }, { k: 'volume', l: 'Loan volume', t: 'money', w: 140 }, { k: 'rival', l: 'Top other lender', t: 'text', w: 190 }];
     var sc = s.rSort.col && tcols.some(function (cc) { return cc.k === s.rSort.col; }) ? s.rSort.col : null;
     if (sc) { var sd = s.rSort.dir === 'desc' ? -1 : 1; trows = trows.slice().sort(function (a, b) { var x = a[sc], y = b[sc]; return (x > y ? 1 : x < y ? -1 : 0) * sd; }); }
-    var OPT = FONT + 'height: 34px; display: flex; align-items: center; gap: 10px; padding: 0 10px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; text-align: left; color: #24285D; ';
-    var opts = function (list, cur, key) { return list.map(function (o) { var on = o[0] === cur; return { label: o[1], pressed: on ? 'true' : 'false', style: OPT + (on ? 'background: #F4F5F9; font-weight: 600;' : 'background: transparent;'),
+    var OPT = FONT + 'height: 34px; display: flex; align-items: center; gap: 10px; padding: 0 10px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; text-align: left; color: #245A8A; ';
+    var opts = function (list, cur, key) { return list.map(function (o) { var on = o[0] === cur; return { label: o[1], pressed: on ? 'true' : 'false', style: OPT + (on ? 'background: #F4F7F9; font-weight: 600;' : 'background: transparent;'),
       pick: function () { var p = { flowPop: null, flowHover: null }; p[key] = o[0]; self.setState(p); } }; }); };
-    var RROW = FONT + 'display: flex; align-items: center; gap: 10px; width: 100%; min-height: 32px; padding: 0 8px; border: none; border-radius: 8px; background: transparent; color: #24285D; font-size: 13px; cursor: pointer;';
+    var RROW = FONT + 'display: flex; align-items: center; gap: 10px; width: 100%; min-height: 32px; padding: 0 8px; border: none; border-radius: 8px; background: transparent; color: #245A8A; font-size: 13px; cursor: pointer;';
     var rbar = function (pct, col) { return 'display: block; height: 100%; border-radius: 999px; background: ' + col + '; width: ' + Math.max(4, Math.round(pct)) + '%;'; };
     var flowRep = {
       eyebrow: 'RETENTION REPORT', title: R.who + ', closed ' + c.label, sub: 'Tracked through September 2026',
@@ -815,12 +815,12 @@ class Component extends DCLogic {
     var self = this, s = this.state;
     var tb = this.gridParts(tcols, trows, rowsAll, false);
     return {
-      flowPill: FONT + 'height: 30px; display: flex; align-items: center; gap: 6px; padding: 0 10px; border-radius: 8px; font-size: 13px; cursor: pointer; box-sizing: border-box; color: #24285D; background: #F4F5F9; border: 1px solid #DADCE8;',
+      flowPill: FONT + 'height: 30px; display: flex; align-items: center; gap: 6px; padding: 0 10px; border-radius: 8px; font-size: 13px; cursor: pointer; box-sizing: border-box; color: #245A8A; background: #F4F7F9; border: 1px solid #DAE2E8;',
       flowMeasureOpen: s.flowPop === 'measure', flowPeriodOpen: s.flowPop === 'period',
       flowMeasureAttr: s.flowPop === 'measure' ? 'true' : 'false', flowPeriodAttr: s.flowPop === 'period' ? 'true' : 'false',
       flowToggleMeasure: function () { self.setState({ flowPop: s.flowPop === 'measure' ? null : 'measure' }); },
       flowTogglePeriod: function () { self.setState({ flowPop: s.flowPop === 'period' ? null : 'period' }); },
-      flowDirStyle: 'display: flex; gap: 2px; padding: 3px; border-radius: 10px; background: #E6E8F2; flex-shrink: 0;',
+      flowDirStyle: 'display: flex; gap: 2px; padding: 3px; border-radius: 10px; background: #E6EEF2; flex-shrink: 0;',
       mapGrid: 'display: grid; gap: 16px; align-items: start; ' + (compact ? 'grid-template-columns: minmax(0, 1fr);' : 'grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);'),
       briefAsk: function () { self.setState({ aiPop: true, aiBrief: true }); },
       rExport: function () { self.setState({ rBanner: { kind: 'export', title: 'Exported ' + trows.length + ' ' + noun + ' to Excel.', did: ['Includes every column in the detail table'], canUndo: false } }); },
@@ -829,18 +829,18 @@ class Component extends DCLogic {
       rBannerStyle: 'border-radius: 8px; padding: 8px 12px; display: flex; gap: 8px; align-items: center; background: #EEF7F2; border: 1px solid #1D7A55;',
       rBannerIcon: '#1D7A55', rDismiss: function () { self.setState({ rBanner: null }); }, rUndo: function () {},
       rKpiRow: 'display: grid; gap: 12px; grid-template-columns: repeat(' + (compact ? 2 : 4) + ', minmax(0, 1fr));',
-      rKpiCard: 'background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 16px; padding: ' + (compact ? '12px 14px' : '14px 18px') + '; display: flex; flex-direction: column; gap: 2px; min-width: 0;',
-      rPopStyle: 'position: absolute; z-index: 12; top: 38px; left: 0; width: ' + (compact ? '100%' : '300px') + '; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 2px; box-shadow: 0 8px 24px rgba(36,40,93,0.16);',
-      rChartCard: 'background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; box-sizing: border-box; ' + (compact ? 'padding: 14px;' : 'padding: 18px 20px;'),
-      rTableCard: 'background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; box-sizing: border-box; ' + (compact ? 'padding: 14px;' : 'padding: 18px 20px;'),
+      rKpiCard: 'background: #FFFFFF; border: 1px solid #DAE2E8; border-radius: 16px; padding: ' + (compact ? '12px 14px' : '14px 18px') + '; display: flex; flex-direction: column; gap: 2px; min-width: 0;',
+      rPopStyle: 'position: absolute; z-index: 12; top: 38px; left: 0; width: ' + (compact ? '100%' : '300px') + '; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DAE2E8; border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 2px; box-shadow: 0 8px 24px rgba(36,90,138,0.16);',
+      rChartCard: 'background: #FFFFFF; border: 1px solid #DAE2E8; border-radius: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; box-sizing: border-box; ' + (compact ? 'padding: 14px;' : 'padding: 18px 20px;'),
+      rTableCard: 'background: #FFFFFF; border: 1px solid #DAE2E8; border-radius: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; box-sizing: border-box; ' + (compact ? 'padding: 14px;' : 'padding: 18px 20px;'),
       rSearchVal: s.rSearch || '', rOnSearch: function (e) { self.setState({ rSearch: e && e.target ? e.target.value : '' }); },
       rCount: trows.length + ' of ' + rowsAll.length, rRowCount: String(trows.length + 2),
-      rScroll: 'border: 1px solid #DADCE8; border-radius: 8px; overflow: auto; max-height: ' + (compact ? '380px' : '420px') + '; background: #FFFFFF;',
-      rHeadRow: tb.rowBase + 'position: sticky; top: 0; z-index: 2; background: #F4F5F9; border-bottom: 1px solid #DADCE8;',
+      rScroll: 'border: 1px solid #DAE2E8; border-radius: 8px; overflow: auto; max-height: ' + (compact ? '380px' : '420px') + '; background: #FFFFFF;',
+      rHeadRow: tb.rowBase + 'position: sticky; top: 0; z-index: 2; background: #F4F7F9; border-bottom: 1px solid #DAE2E8;',
       rNumHead: tb.NUM + 'z-index: 3;', rNumCell: tb.NUM, rNumFoot: tb.NUM,
       rHead: tb.head, rRows: tb.body, rNone: trows.length === 0,
       rFix: function () { self.setState({ rSearch: '' }); },
-      rFootRow: tb.rowBase + 'position: sticky; bottom: 0; z-index: 2; background: #F4F5F9; border-top: 1px solid #DADCE8;',
+      rFootRow: tb.rowBase + 'position: sticky; bottom: 0; z-index: 2; background: #F4F7F9; border-top: 1px solid #DAE2E8;',
       rFoot: tb.foot
     };
   }
@@ -854,15 +854,15 @@ class Component extends DCLogic {
       isReports: s.tab === 'reports',
       rep: rep,
       rTabsRow: 'display: flex; align-items: center; gap: 8px; ' + (compact ? 'flex-wrap: wrap;' : ''),
-      rTabsStyle: 'display: flex; gap: 2px; padding: 3px; background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 10px; box-sizing: border-box; min-width: 0; overflow-x: auto; ' + (compact ? 'width: 100%;' : 'flex-shrink: 0;'),
+      rTabsStyle: 'display: flex; gap: 2px; padding: 3px; background: #FFFFFF; border: 1px solid #DAE2E8; border-radius: 10px; box-sizing: border-box; min-width: 0; overflow-x: auto; ' + (compact ? 'width: 100%;' : 'flex-shrink: 0;'),
       rLib: lib.map(function (r) {
         var on = r.id === rep.id;
         return { label: r.custom ? '✦ ' + r.label : compact ? RCFG[r.id].short : r.label, pressed: on ? 'true' : 'false',
-          style: FONT + 'height: 32px; padding: 0 12px; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; ' + (on ? 'background: #24285D; color: #FFFFFF;' : 'background: transparent; color: #474945;'),
+          style: FONT + 'height: 32px; padding: 0 12px; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; ' + (on ? 'background: #245A8A; color: #FFFFFF;' : 'background: transparent; color: #474945;'),
           pick: function () { if (r.custom) { self.openMyReport(r.id); return; } self.setState({ reportId: r.id, rFilters: [], rSort: { col: null, dir: 'asc' }, rAdd: false, rEdit: null, rBanner: null, rHoverBin: null }); } };
       }),
       rNew: function () { self.setState({ aiPop: true }); },
-      rNewStyle: FONT + 'height: 38px; display: flex; align-items: center; gap: 6px; padding: 0 12px; border: 1px dashed #8286A8; border-radius: 10px; background: transparent; color: #24285D; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;'
+      rNewStyle: FONT + 'height: 38px; display: flex; align-items: center; gap: 6px; padding: 0 12px; border: 1px dashed #74899B; border-radius: 10px; background: transparent; color: #245A8A; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;'
     };
     if (rep.map) return Object.assign(tabs, this.mapVals(compact), { isTable: false, isMap: true, isFlow: false });
     if (rep.sankey) return Object.assign(tabs, rep.retain ? this.retainVals(compact) : this.flowVals(compact), { isTable: false, isMap: false, isFlow: true, hasLoTable: false });
@@ -920,9 +920,9 @@ class Component extends DCLogic {
         var on = i === hb;
         return { label: short(x.a) + '+',
           hover: function () { if (self.state.rHoverBin !== i) self.setState({ rHoverBin: i }); },
-          colStyle: 'flex: 1 1 0; height: 100%; position: relative; border-radius: 4px 4px 0 0; ' + (on ? 'background: #F4F5F9;' : ''),
-          ghostStyle: 'position: absolute; left: 0; right: 0; bottom: 0; border-radius: 4px 4px 0 0; background: #DADCE8; height: ' + Math.round(x.all / maxBin * 100) + '%;',
-          barStyle: 'position: absolute; left: 0; right: 0; bottom: 0; border-radius: 4px 4px 0 0; background: ' + (on ? '#F89624' : '#24285D') + '; height: ' + Math.round(x.hit / maxBin * 100) + '%;' };
+          colStyle: 'flex: 1 1 0; height: 100%; position: relative; border-radius: 4px 4px 0 0; ' + (on ? 'background: #F4F7F9;' : ''),
+          ghostStyle: 'position: absolute; left: 0; right: 0; bottom: 0; border-radius: 4px 4px 0 0; background: #DAE2E8; height: ' + Math.round(x.all / maxBin * 100) + '%;',
+          barStyle: 'position: absolute; left: 0; right: 0; bottom: 0; border-radius: 4px 4px 0 0; background: ' + (on ? '#C69C46' : '#245A8A') + '; height: ' + Math.round(x.hit / maxBin * 100) + '%;' };
       })
     };
 
@@ -942,8 +942,8 @@ class Component extends DCLogic {
           var v = groups[g];
           return { label: g, value: m ? fmtCell(m, v) : String(v), aria: 'Filter to ' + g,
             pick: function () { setF(filters.filter(function (f) { return f.c !== gc.k; }).concat([{ c: gc.k, o: 'is', v: [g] }])); },
-            rowStyle: FONT + 'display: flex; align-items: center; gap: 10px; min-height: 30px; padding: 0 6px; border: none; border-radius: 6px; background: transparent; color: #24285D; cursor: pointer; width: 100%;',
-            barStyle: 'position: absolute; left: 0; top: 0; bottom: 0; border-radius: 0 4px 4px 0; background: #24285D; width: ' + Math.max(2, Math.round(v / (gmax || 1) * 100)) + '%;',
+            rowStyle: FONT + 'display: flex; align-items: center; gap: 10px; min-height: 30px; padding: 0 6px; border: none; border-radius: 6px; background: transparent; color: #245A8A; cursor: pointer; width: 100%;',
+            barStyle: 'position: absolute; left: 0; top: 0; bottom: 0; border-radius: 0 4px 4px 0; background: #245A8A; width: ' + Math.max(2, Math.round(v / (gmax || 1) * 100)) + '%;',
             valStyle: 'width: 64px; flex-shrink: 0; text-align: right; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums;' };
         }) };
     } else {
@@ -958,7 +958,7 @@ class Component extends DCLogic {
           var v = r[tc.k], w = Math.round(Math.abs(v) / amax * 50);
           return { label: r[first.k], value: fmtCell(tc, v), aria: 'Find ' + r[first.k] + ' in the table',
             pick: function () { self.setState({ rSearch: String(r[first.k]) }); },
-            rowStyle: FONT + 'display: flex; align-items: center; gap: 10px; min-height: 28px; padding: 0 6px; border: none; border-radius: 6px; background: transparent; color: #24285D; cursor: pointer; width: 100%;',
+            rowStyle: FONT + 'display: flex; align-items: center; gap: 10px; min-height: 28px; padding: 0 6px; border: none; border-radius: 6px; background: transparent; color: #245A8A; cursor: pointer; width: 100%;',
             barStyle: 'position: absolute; top: 0; bottom: 0; background: ' + (v >= 0 ? '#1D7A55' : '#B3261E') + '; width: ' + Math.max(1, w) + '%; ' + (v >= 0 ? 'left: 50%; border-radius: 0 4px 4px 0;' : 'right: 50%; border-radius: 4px 0 0 4px;'),
             valStyle: 'width: 72px; flex-shrink: 0; text-align: right; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; color: ' + (v > 0 ? '#1D7A55' : v < 0 ? '#B3261E' : '#474945') + ';' };
         }) };
@@ -972,7 +972,7 @@ class Component extends DCLogic {
       var c = colOf(f.c), open = s.rEdit === i;
       return { col: c.l, op: opLabel(c, f), val: valLabel(c, f), ai: !!f.ai, open: open ? 'true' : 'false',
         edit: function () { self.setState({ rEdit: open ? null : i, rAdd: false }); },
-        style: FONT + 'height: 30px; display: flex; align-items: center; gap: 6px; padding: 0 10px; border-radius: 8px; font-size: 13px; cursor: pointer; box-sizing: border-box; color: #24285D; background: ' + (open ? '#E6E8F2' : '#F4F5F9') + '; border: 1px solid ' + (f.ai ? '#F89624' : (open ? '#8286A8' : '#DADCE8')) + ';' };
+        style: FONT + 'height: 30px; display: flex; align-items: center; gap: 6px; padding: 0 10px; border-radius: 8px; font-size: 13px; cursor: pointer; box-sizing: border-box; color: #245A8A; background: ' + (open ? '#E6EEF2' : '#F4F7F9') + '; border: 1px solid ' + (f.ai ? '#C69C46' : (open ? '#74899B' : '#DAE2E8')) + ';' };
     });
     var ed = null;
     if (s.rEdit != null && filters[s.rEdit]) {
@@ -980,11 +980,11 @@ class Component extends DCLogic {
       var upd = function (patch) { var n = filters.slice(); n[fi] = Object.assign({}, f, patch, { ai: false }); self.setState({ rFilters: n, rBanner: null }); };
       var opsList = c.t === 'text' ? [['is', 'is'], ['not', 'is not']] : [['>=', '≥'], ['<=', '≤'], ['>', '>'], ['<', '<']];
       var OPB = FONT + 'height: 26px; padding: 0 8px; border: none; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; ';
-      var ROW = FONT + 'height: 32px; display: flex; align-items: center; gap: 10px; padding: 0 8px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; text-align: left; color: #24285D; ';
+      var ROW = FONT + 'height: 32px; display: flex; align-items: center; gap: 10px; padding: 0 8px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; text-align: left; color: #245A8A; ';
       var sel = Array.isArray(f.v) ? f.v : [f.v];
       ed = { col: c.l, isNum: c.t !== 'text', valText: c.t === 'text' ? '' : 'Current: ' + fmtVal(c, f.v),
         ops: opsList.map(function (o) { var on = f.o === o[0]; return { label: o[1], pressed: on ? 'true' : 'false', pick: function () { upd({ o: o[0] }); },
-          style: OPB + (on ? 'background: #FFFFFF; color: #24285D; box-shadow: 0 1px 2px rgba(36,40,93,0.2);' : 'background: transparent; color: #474945;') }; }),
+          style: OPB + (on ? 'background: #FFFFFF; color: #245A8A; box-shadow: 0 1px 2px rgba(36,90,138,0.2);' : 'background: transparent; color: #474945;') }; }),
         onNum: function (e) { var n = parseFloat(e && e.target ? e.target.value : ''); if (!isNaN(n)) upd({ v: c.t === 'money' ? n * 1000 : n }); },
         vals: (c.t === 'text' ? distinct(rep.data, c.k) : filterOptions(c, rep.data).map(function (o) { return o.v; }).filter(function (v, j, a) { return a.indexOf(v) === j; })).map(function (v) {
           var on = c.t === 'text' ? sel.indexOf(v) >= 0 : f.v === v;
@@ -994,8 +994,8 @@ class Component extends DCLogic {
               var nv = on ? sel.filter(function (x) { return x !== v; }) : sel.concat([v]);
               upd({ v: nv });
             },
-            style: ROW + (on ? 'background: #F4F5F9;' : 'background: transparent;'),
-            checkStyle: 'width: 16px; height: 16px; flex-shrink: 0; border-radius: ' + (c.t === 'text' ? '4px' : '999px') + '; display: flex; align-items: center; justify-content: center; box-sizing: border-box; ' + (on ? 'background: #24285D; border: 1px solid #24285D;' : 'background: #FFFFFF; border: 1px solid #8286A8;') };
+            style: ROW + (on ? 'background: #F4F7F9;' : 'background: transparent;'),
+            checkStyle: 'width: 16px; height: 16px; flex-shrink: 0; border-radius: ' + (c.t === 'text' ? '4px' : '999px') + '; display: flex; align-items: center; justify-content: center; box-sizing: border-box; ' + (on ? 'background: #245A8A; border: 1px solid #245A8A;' : 'background: #FFFFFF; border: 1px solid #74899B;') };
         }),
         remove: function () { var n = filters.slice(); n.splice(fi, 1); setF(n); } };
     }
@@ -1014,8 +1014,8 @@ class Component extends DCLogic {
       } }; }),
       rHasBanner: !!banner,
       rBanner: banner ? { title: banner.title, didText: (banner.did || []).join('. ') + '.', canUndo: !!banner.canUndo } : { title: '', didText: '', canUndo: false },
-      rBannerStyle: 'border-radius: 8px; padding: 8px 12px; display: flex; gap: 8px; align-items: center; ' + (banner && banner.kind === 'export' ? 'background: #EEF7F2; border: 1px solid #1D7A55;' : 'background: #FFFFFF; border: 1px solid #F89624;'),
-      rBannerIcon: banner && banner.kind === 'export' ? '#1D7A55' : '#A34F00',
+      rBannerStyle: 'border-radius: 8px; padding: 8px 12px; display: flex; gap: 8px; align-items: center; ' + (banner && banner.kind === 'export' ? 'background: #EEF7F2; border: 1px solid #1D7A55;' : 'background: #FFFFFF; border: 1px solid #C69C46;'),
+      rBannerIcon: banner && banner.kind === 'export' ? '#1D7A55' : '#8A6A22',
       rUndo: function () { self.setState({ rFilters: (banner && banner.prev) || [], rBanner: null }); },
       rDismiss: function () { self.setState({ rBanner: null }); },
       rExport: function () {
@@ -1036,18 +1036,18 @@ class Component extends DCLogic {
       } }; }),
       rEditing: !!ed, ed: ed || { col: '', isNum: false, valText: '', ops: [], vals: [], onNum: function () {}, remove: function () {} },
       rClosePop: function () { self.setState({ rEdit: null, rAdd: false }); },
-      rPopStyle: 'position: absolute; z-index: 12; top: 38px; left: 0; width: ' + (compact ? '100%' : '320px') + '; max-height: 360px; overflow-y: auto; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 2px; box-shadow: 0 8px 24px rgba(36,40,93,0.16);',
+      rPopStyle: 'position: absolute; z-index: 12; top: 38px; left: 0; width: ' + (compact ? '100%' : '320px') + '; max-height: 360px; overflow-y: auto; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DAE2E8; border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 2px; box-shadow: 0 8px 24px rgba(36,90,138,0.16);',
       rKpiRow: 'display: grid; gap: 12px; ' + 'grid-template-columns: repeat(' + (compact ? 2 : Math.min(4, kpis.length)) + ', minmax(0, 1fr));',
-      rKpiCard: 'background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 16px; padding: ' + (compact ? '12px 14px' : '14px 18px') + '; display: flex; flex-direction: column; gap: 2px; min-width: 0;',
+      rKpiCard: 'background: #FFFFFF; border: 1px solid #DAE2E8; border-radius: 16px; padding: ' + (compact ? '12px 14px' : '14px 18px') + '; display: flex; flex-direction: column; gap: 2px; min-width: 0;',
       rKpis: kpis.slice(0, 4),
       rChartRow: 'display: grid; gap: 16px; ' + (compact ? 'grid-template-columns: minmax(0, 1fr);' : 'grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);'),
-      rChartCard: 'background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 16px; display: flex; flex-direction: column; gap: 14px; min-width: 0; box-sizing: border-box; ' + (compact ? 'padding: 14px;' : 'padding: 18px 20px;'),
+      rChartCard: 'background: #FFFFFF; border: 1px solid #DAE2E8; border-radius: 16px; display: flex; flex-direction: column; gap: 14px; min-width: 0; box-sizing: border-box; ' + (compact ? 'padding: 14px;' : 'padding: 18px 20px;'),
       hist: hist, bars: bars,
-      rTableCard: 'background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; box-sizing: border-box; ' + (compact ? 'padding: 14px;' : 'padding: 18px 20px;'),
+      rTableCard: 'background: #FFFFFF; border: 1px solid #DAE2E8; border-radius: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; box-sizing: border-box; ' + (compact ? 'padding: 14px;' : 'padding: 18px 20px;'),
       rCount: data.length + ' of ' + rep.data.length,
       rRowCount: String(data.length + 2),
-      rScroll: 'border: 1px solid #DADCE8; border-radius: 8px; overflow: auto; max-height: ' + (compact ? '380px' : '420px') + '; background: #FFFFFF;',
-      rHeadRow: rowBase + 'position: sticky; top: 0; z-index: 2; background: #F4F5F9; border-bottom: 1px solid #DADCE8;',
+      rScroll: 'border: 1px solid #DAE2E8; border-radius: 8px; overflow: auto; max-height: ' + (compact ? '380px' : '420px') + '; background: #FFFFFF;',
+      rHeadRow: rowBase + 'position: sticky; top: 0; z-index: 2; background: #F4F7F9; border-bottom: 1px solid #DAE2E8;',
       rNumHead: NUM + 'z-index: 3;',
       rNumCell: NUM, rNumFoot: NUM,
       rHead: head, rRows: body, rNone: data.length === 0,
@@ -1059,7 +1059,7 @@ class Component extends DCLogic {
         var d0 = filters[best], c0 = colOf(d0.c), n = filters.slice(); n.splice(best, 1);
         setF(n, { rBanner: { title: 'Genie loosened your filters.', did: ['Removed “' + c0.l + ' ' + opLabel(c0, d0) + ' ' + valLabel(c0, d0) + '”, which ruled out every row'], canUndo: true, prev: filters, kind: 'ai' } });
       },
-      rFootRow: rowBase + 'position: sticky; bottom: 0; z-index: 2; background: #F4F5F9; border-top: 1px solid #DADCE8;',
+      rFootRow: rowBase + 'position: sticky; bottom: 0; z-index: 2; background: #F4F7F9; border-top: 1px solid #DAE2E8;',
       rFoot: foot
     });
   }
@@ -1089,7 +1089,7 @@ class Component extends DCLogic {
       if (c.id === 'agent') return persona === 'lo' ? 'Add to deals' : 'Save contact';
       return c.id === 'property' ? 'Save property' : 'Save company';
     };
-    var avatar = function (c) { return 'width: 36px; height: 36px; flex-shrink: 0; border-radius: ' + (c.person ? '999px' : '10px') + '; display: flex; align-items: center; justify-content: center; font-family: Montserrat, sans-serif; font-size: 12px; font-weight: 700; ' + (c.person ? 'background: #24285D; color: #FFFFFF;' : 'background: #F4F5F9; color: #24285D; border: 1px solid #DADCE8;'); };
+    var avatar = function (c) { return 'width: 36px; height: 36px; flex-shrink: 0; border-radius: ' + (c.person ? '999px' : '10px') + '; display: flex; align-items: center; justify-content: center; font-family: Montserrat, sans-serif; font-size: 12px; font-weight: 700; ' + (c.person ? 'background: #245A8A; color: #FFFFFF;' : 'background: #F4F7F9; color: #245A8A; border: 1px solid #DAE2E8;'); };
     var kinds = function (c) { return { isPerson: !!c.person, isLender: c.id === 'lender', isOffice: c.id === 'office', isTitle: c.id === 'title', isProperty: c.id === 'property' }; };
 
     // Header dropdown: a few rows per category, or more of one when it is toggled to a single category.
@@ -1101,7 +1101,7 @@ class Component extends DCLogic {
           var idx = flat.length, on = idx === s.srAct;
           var it = { name: x.name, sub: g.cat.sub(x), metric: gated && g.cat.id === 'lo' ? 'Production hidden by your org' : g.cat.metric(x), initials: initials(x.name).toUpperCase(), id: 'sr-opt-' + x.id,
             selected: on ? 'true' : 'false',
-            style: FONT + 'display: flex; align-items: center; gap: 12px; width: 100%; box-sizing: border-box; padding: 8px 10px; border: none; border-radius: 10px; text-align: left; cursor: pointer; color: #24285D; ' + (on ? 'background: #F4F5F9; box-shadow: inset 3px 0 0 #F89624;' : 'background: transparent;'),
+            style: FONT + 'display: flex; align-items: center; gap: 12px; width: 100%; box-sizing: border-box; padding: 8px 10px; border: none; border-radius: 10px; text-align: left; cursor: pointer; color: #245A8A; ' + (on ? 'background: #F4F7F9; box-shadow: inset 3px 0 0 #C69C46;' : 'background: transparent;'),
             hover: function () { if (self.state.srAct !== idx) self.setState({ srAct: idx }); },
             open: function () { self.searchGo({ srCat: g.cat.id, srSel: x.id }); } };
           flat.push(it);
@@ -1117,7 +1117,7 @@ class Component extends DCLogic {
       self.searchGo({ srCat: first });
     };
     var onlyCat = s.srOnly ? searchCat(s.srOnly) : null;
-    var chipStyle = function (on) { return FONT + 'flex-shrink: 0; height: 30px; padding: 0 12px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; ' + (on ? 'border: 1px solid #24285D; background: #24285D; color: #FFFFFF;' : 'border: 1px solid #DADCE8; background: #FFFFFF; color: #24285D;'); };
+    var chipStyle = function (on) { return FONT + 'flex-shrink: 0; height: 30px; padding: 0 12px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; ' + (on ? 'border: 1px solid #245A8A; background: #245A8A; color: #FFFFFF;' : 'border: 1px solid #DAE2E8; background: #FFFFFF; color: #245A8A;'); };
     var chips = [{ id: null, label: 'All' }].concat(SEARCH_CATS.map(function (c) { return { id: c.id, label: compact ? c.short : c.label }; })).map(function (c) {
       var on = (s.srOnly || null) === c.id;
       return { label: c.label, pressed: on ? 'true' : 'false', style: chipStyle(on), pick: function () { self.setState({ srOnly: c.id, srAct: -1, srOpen: true }); self.focusSearch(); } };
@@ -1141,7 +1141,7 @@ class Component extends DCLogic {
       return { label: f.l, val: val, on: on, off: !on, ai: isAi, locked: locked, open: pop === f.k ? 'true' : 'false',
         title: locked ? 'Hidden by your org’s settings' : '',
         style: FONT + 'height: 32px; display: flex; align-items: center; gap: 6px; padding: 0 10px 0 12px; border-radius: 8px; font-size: 13px; cursor: ' + (locked ? 'not-allowed' : 'pointer') + '; white-space: nowrap; box-sizing: border-box; ' +
-          (locked ? 'border: 1px dashed #DADCE8; background: #F4F5F9; color: #8286A8;' : isAi ? 'border: 1px solid #F89624; background: #F4F5F9; color: #24285D;' : on ? 'border: 1px solid #24285D; background: #FFFFFF; color: #24285D; box-shadow: inset 0 0 0 1px #24285D;' : 'border: 1px solid #DADCE8; background: #FFFFFF; color: #474945;'),
+          (locked ? 'border: 1px dashed #DAE2E8; background: #F4F7F9; color: #74899B;' : isAi ? 'border: 1px solid #C69C46; background: #F4F7F9; color: #245A8A;' : on ? 'border: 1px solid #245A8A; background: #FFFFFF; color: #245A8A; box-shadow: inset 0 0 0 1px #245A8A;' : 'border: 1px solid #DAE2E8; background: #FFFFFF; color: #474945;'),
         toggle: function () { if (!locked) self.setState({ srPop: pop === f.k ? null : f.k }); },
         clear: function () { setF(f.k, null, { srPop: null }); } };
     });
@@ -1149,7 +1149,7 @@ class Component extends DCLogic {
     var popOpts = !pf ? [] : (pf.t === 'min' ? [null].concat(pf.opts) : searchOptions(persona, cat, pf)).map(function (o) {
       var cur = cf[pf.k], on = pf.t === 'min' ? (cur == null ? o == null : cur === o) : !!(cur && cur.indexOf(o) >= 0);
       return { label: pf.t === 'min' ? (o == null ? 'Any' : o + ' or more') : o, on: on, checked: on ? 'true' : 'false', radio: pf.t === 'min', check: pf.t !== 'min',
-        box: 'width: 16px; height: 16px; flex-shrink: 0; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border-radius: ' + (pf.t === 'min' ? '999px' : '4px') + '; ' + (on ? 'background: #24285D; border: 1px solid #24285D; color: #FFFFFF;' : 'background: #FFFFFF; border: 1px solid #8286A8;'),
+        box: 'width: 16px; height: 16px; flex-shrink: 0; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border-radius: ' + (pf.t === 'min' ? '999px' : '4px') + '; ' + (on ? 'background: #245A8A; border: 1px solid #245A8A; color: #FFFFFF;' : 'background: #FFFFFF; border: 1px solid #74899B;'),
         pick: function () {
           if (pf.t === 'min') { setF(pf.k, o); return; }
           var list = (cur || []).slice(), at = list.indexOf(o);
@@ -1166,7 +1166,7 @@ class Component extends DCLogic {
       var primary = actLabel(cat);
       var cells = cat.cols.map(function (c) {
         var hide = gated && c.gated, v = x[c.k];
-        return { label: c.l, text: hide ? 'Hidden' : searchFmt(v, c.f), hidden: hide, textStyle: hide ? 'color: #8286A8; font-style: italic;' : '', isTag: !hide && c.f === 'tag', plain: hide || c.f !== 'tag', tone: SEARCH_TONE[v] || 'neutral',
+        return { label: c.l, text: hide ? 'Hidden' : searchFmt(v, c.f), hidden: hide, textStyle: hide ? 'color: #74899B; font-style: italic;' : '', isTag: !hide && c.f === 'tag', plain: hide || c.f !== 'tag', tone: SEARCH_TONE[v] || 'neutral',
           title: hide ? 'Hidden by your org’s settings' : '' };
       });
       var detail = cat.detail.map(function (dd) { var hide = gated && dd[3]; return { label: dd[1], text: hide ? 'Hidden by your org’s settings' : searchFmt(x[dd[0]], dd[2]) }; });
@@ -1183,10 +1183,10 @@ class Component extends DCLogic {
         open: sel, expanded: sel ? 'true' : 'false',
         toggle: function () { self.setState({ srSel: sel ? null : x.id }); },
         actLabel: acted[primary] ? 'Added · synced to CRM' : primary, actDone: !!acted[primary], act: act(primary),
-        actStyle: FONT + 'height: 34px; padding: 0 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; ' + (acted[primary] ? 'border: 1px solid #DADCE8; background: #FFFFFF; color: #1D7A55;' : 'border: 1px solid #24285D; background: #24285D; color: #FFFFFF;'),
+        actStyle: FONT + 'height: 34px; padding: 0 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; ' + (acted[primary] ? 'border: 1px solid #DAE2E8; background: #FFFFFF; color: #1D7A55;' : 'border: 1px solid #245A8A; background: #245A8A; color: #FFFFFF;'),
         remindLabel: acted.remind ? 'Reminder set for tomorrow' : 'Set a reminder', remind: function () { var a = Object.assign({}, s.srActed), m = Object.assign({}, acted); m.remind = true; a[x.id] = m; self.setState({ srActed: a, log: self.addLog('Reminder set: ' + x.name) }); },
         touchLabel: acted.touch ? 'Touch logged · synced' : 'Log a touch', touch: function () { var a = Object.assign({}, s.srActed), m = Object.assign({}, acted); m.touch = true; a[x.id] = m; self.setState({ srActed: a, log: self.addLog('Touch logged: ' + x.name) }); },
-        rowStyle: 'border-top: 1px solid #DADCE8; ' + (sel ? 'background: #F4F5F9;' : ''),
+        rowStyle: 'border-top: 1px solid #DAE2E8; ' + (sel ? 'background: #F4F7F9;' : ''),
         mainStyle: 'box-sizing: border-box; ' + (compact ? 'display: flex; flex-direction: column; gap: 8px; padding: 12px 0;' : 'display: grid; grid-template-columns: minmax(0, 2.4fr) repeat(4, minmax(0, 1fr)) 170px; gap: 16px; align-items: center; padding: 10px 12px;'),
         avatar: avatar(cat) });
     });
@@ -1196,8 +1196,8 @@ class Component extends DCLogic {
     var tabs = SEARCH_CATS.map(function (c) {
       var on = c.id === cat.id, n = onPage ? searchMatches(persona, c.id, q).length : 0;
       return { label: compact ? c.short : c.label, count: n, pressed: on ? 'true' : 'false',
-        style: FONT + 'height: 32px; display: flex; align-items: center; gap: 6px; padding: 0 10px 0 12px; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; ' + (on ? 'background: #24285D; color: #FFFFFF;' : 'background: transparent; color: #474945;'),
-        countStyle: 'min-width: 20px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 999px; font-size: 11px; line-height: 18px; text-align: center; ' + (on ? 'background: #F89624; color: #24285D;' : 'background: #F4F5F9; color: #474945;'),
+        style: FONT + 'height: 32px; display: flex; align-items: center; gap: 6px; padding: 0 10px 0 12px; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; ' + (on ? 'background: #245A8A; color: #FFFFFF;' : 'background: transparent; color: #474945;'),
+        countStyle: 'min-width: 20px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 999px; font-size: 11px; line-height: 18px; text-align: center; ' + (on ? 'background: #C69C46; color: #173A5C;' : 'background: #F4F7F9; color: #474945;'),
         pick: function () { self.setState({ srCat: c.id, srSel: null, srPop: null, srLimit: SEARCH_PAGE, srBanner: null }); } };
     });
     var banner = s.srBanner && s.srBanner.cat === cat.id ? s.srBanner : null;
@@ -1240,10 +1240,10 @@ class Component extends DCLogic {
         ? 'position: fixed; z-index: 60; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box; padding: 8px 12px 12px; background: #FFFFFF;'
         : 'position: relative; flex: 1 1 360px; min-width: 160px; max-width: 560px;',
       srBarStyle: 'display: flex; align-items: center; gap: 8px; ' + (compact ? '' : ''),
-      srBoxStyle: FONT + 'flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 6px 0 14px; box-sizing: border-box; border-radius: 999px; cursor: text; ' + (panelOpen ? 'border: 1px solid #24285D; background: #FFFFFF; box-shadow: 0 0 0 3px rgba(36,40,93,0.10);' : 'border: 1px solid #DADCE8; background: #F4F5F9;'),
+      srBoxStyle: FONT + 'flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 6px 0 14px; box-sizing: border-box; border-radius: 999px; cursor: text; ' + (panelOpen ? 'border: 1px solid #245A8A; background: #FFFFFF; box-shadow: 0 0 0 3px rgba(36,90,138,0.10);' : 'border: 1px solid #DAE2E8; background: #F4F7F9;'),
       srPanelStyle: compact
         ? 'flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-top: 4px;'
-        : 'position: absolute; z-index: 25; top: 48px; left: 0; width: 640px; max-width: calc(100vw - 300px); min-width: 100%; max-height: calc(100vh - 196px); overflow-y: auto; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 16px 40px rgba(36,40,93,0.20);',
+        : 'position: absolute; z-index: 25; top: 48px; left: 0; width: 640px; max-width: calc(100vw - 300px); min-width: 100%; max-height: calc(100vh - 196px); overflow-y: auto; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DAE2E8; border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 16px 40px rgba(36,90,138,0.20);',
       srChipRow: 'display: flex; flex-shrink: 0; gap: 6px; ' + (compact ? 'overflow-x: auto; padding-bottom: 2px;' : 'flex-wrap: wrap;'),
       srChips: chips,
       srRecent: (s.srRecent || []).map(function (r) { return { label: r, go: function () { self.setState({ srQ: r, srOpen: true, srAct: -1 }); self.focusSearch(); } }; }),
@@ -1258,19 +1258,19 @@ class Component extends DCLogic {
       srAdvLabel: onlyCat ? 'Advanced ' + onlyCat.short.toLowerCase() + ' search' : 'Advanced search',
 
       srTabs: tabs,
-      srTabsStyle: 'display: flex; gap: 2px; padding: 3px; background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 10px; box-sizing: border-box; min-width: 0; overflow-x: auto; ' + (compact ? 'width: 100%;' : 'align-self: flex-start; max-width: 100%;'),
+      srTabsStyle: 'display: flex; gap: 2px; padding: 3px; background: #FFFFFF; border: 1px solid #DAE2E8; border-radius: 10px; box-sizing: border-box; min-width: 0; overflow-x: auto; ' + (compact ? 'width: 100%;' : 'align-self: flex-start; max-width: 100%;'),
       srPageInput: compact,
       srCountLine: res.total.toLocaleString('en-US') + ' ' + (res.total === 1 ? cat.one : lower) + (hasQ ? ' match “' + q.trim() + '”' : '') + ' in ' + d.territory,
       srPills: pills, srHasFilters: filterCount > 0, srResetF: function () { var all = Object.assign({}, s.srF), ai = Object.assign({}, s.srAi); all[cat.id] = {}; ai[cat.id] = {}; self.setState({ srF: all, srAi: ai, srPop: null, srBanner: null, srLimit: SEARCH_PAGE }); },
       srPopOpen: !!pf, srPopTitle: pf ? pf.l : '', srPopOpts: popOpts, srPopClose: function () { self.setState({ srPop: null }); },
       srPopClear: function () { if (pf) setF(pf.k, null, { srPop: null }); },
-      srPopStyle: 'position: absolute; z-index: 12; top: 40px; left: 0; width: ' + (compact ? '100%' : '300px') + '; max-height: 360px; overflow-y: auto; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 2px; box-shadow: 0 8px 24px rgba(36,40,93,0.16);',
+      srPopStyle: 'position: absolute; z-index: 12; top: 40px; left: 0; width: ' + (compact ? '100%' : '300px') + '; max-height: 360px; overflow-y: auto; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DAE2E8; border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 2px; box-shadow: 0 8px 24px rgba(36,90,138,0.16);',
       srSortLabel: sortOn.l, srSortOpen: pop === '_sort' ? 'true' : 'false', srSortPop: pop === '_sort',
       srSortToggle: function () { self.setState({ srPop: pop === '_sort' ? null : '_sort' }); },
       srSorts: sorts.map(function (o) { var on = o.id === sortOn.id; return { label: o.l, on: on, checked: on ? 'true' : 'false',
-        style: FONT + 'height: 32px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 8px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; text-align: left; color: #24285D; ' + (on ? 'background: #F4F5F9; font-weight: 600;' : 'background: transparent;'),
+        style: FONT + 'height: 32px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 8px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; text-align: left; color: #245A8A; ' + (on ? 'background: #F4F7F9; font-weight: 600;' : 'background: transparent;'),
         pick: function () { var all = Object.assign({}, s.srSort); all[cat.id] = o.id; self.setState({ srSort: all, srPop: null, srLimit: SEARCH_PAGE }); } }; }),
-      srSortPopStyle: 'position: absolute; z-index: 12; top: 40px; ' + (compact ? 'left: 0; width: 100%;' : 'right: 0; width: 240px;') + ' box-sizing: border-box; background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 2px; box-shadow: 0 8px 24px rgba(36,40,93,0.16);',
+      srSortPopStyle: 'position: absolute; z-index: 12; top: 40px; ' + (compact ? 'left: 0; width: 100%;' : 'right: 0; width: 240px;') + ' box-sizing: border-box; background: #FFFFFF; border: 1px solid #DAE2E8; border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 2px; box-shadow: 0 8px 24px rgba(36,90,138,0.16);',
       srGenieQ: cat.genie ? cat.genie.q : '', srHasGenie: !!cat.genie,
       srGenieRun: function () {
         var g = cat.genie, all = Object.assign({}, s.srF), ai = Object.assign({}, s.srAi), keys = {};
@@ -1305,30 +1305,30 @@ class Component extends DCLogic {
     if (compact && shown.length > nav.phoneMax) { extra = shown.slice(nav.phoneMax - 1); shown = shown.slice(0, nav.phoneMax - 1); }
     var kinds = function (id) { return { isHome: id === 'home', isExplore: id === 'explore', isActions: id === 'actions', isReports: id === 'reports', isCrm: id === 'crm' }; };
     var go = function (id) { return function () { self.setState({ tab: id, aiPop: false, srOpen: false, navMore: false }); }; };
-    var badgeBase = 'box-sizing: border-box; border-radius: 999px; background: #F89624; color: #24285D; font-weight: 700; text-align: center; ';
+    var badgeBase = 'box-sizing: border-box; border-radius: 999px; background: #C69C46; color: #173A5C; font-weight: 700; text-align: center; ';
     // Phone, and desktop icon-only: the count sits as a small badge on the icon's top right corner.
     var corner = compact || icons;
     var menu = shown.map(function (id) {
       var m = defs[id], on = tab === id, label = compact && m.short ? m.short : m.label;
       return Object.assign(kinds(id), { label: label, showLabel: !icons, aria: icons ? m.label : false, title: icons ? m.label : false, current: on ? 'page' : 'false',
         hasBadge: id === 'actions' && remaining > 0,
-        badgeStyle: badgeBase + (corner ? 'position: absolute; top: ' + (compact ? '3px' : '6px') + '; left: calc(50% + 3px); min-width: 17px; height: 17px; padding: 0 4px; font-size: 10px; line-height: 15px; border: 1px solid ' + (on && side ? '#FFFFFF' : '#24285D') + ';' : 'min-width: 20px; height: 20px; padding: 0 6px; font-size: 11px; line-height: 20px;' + (side ? ' margin-left: auto;' : '')),
+        badgeStyle: badgeBase + (corner ? 'position: absolute; top: ' + (compact ? '3px' : '6px') + '; left: calc(50% + 3px); min-width: 17px; height: 17px; padding: 0 4px; font-size: 10px; line-height: 15px; border: 1px solid ' + (on && side ? '#FFFFFF' : '#245A8A') + ';' : 'min-width: 20px; height: 20px; padding: 0 6px; font-size: 11px; line-height: 20px;' + (side ? ' margin-left: auto;' : '')),
         go: go(id),
         style: FONT + 'display: flex; align-items: center; position: relative; border: none; font-weight: 600; cursor: pointer; white-space: nowrap; box-sizing: border-box; ' + (compact
-          ? 'justify-content: center; gap: 2px; flex-direction: column; flex: 1 1 0; min-height: ' + (icons ? '44px' : '52px') + '; padding: 4px 2px; font-size: 11px; border-radius: 12px; ' + (on ? 'background: #FFFFFF; color: #24285D;' : 'background: transparent; color: #EEF0F8;')
+          ? 'justify-content: center; gap: 2px; flex-direction: column; flex: 1 1 0; min-height: ' + (icons ? '44px' : '52px') + '; padding: 4px 2px; font-size: 11px; border-radius: 12px; ' + (on ? 'background: #FFFFFF; color: #245A8A;' : 'background: transparent; color: #EEF5F8;')
           // Right rail: full-width rows, the current page as a white row.
-          : side ? 'gap: 12px; width: 100%; min-height: 44px; font-size: 14px; border-radius: 10px; ' + (icons ? 'justify-content: center; padding: 0;' : 'justify-content: flex-start; padding: 0 14px;') + (on ? 'background: #FFFFFF; color: #24285D;' : 'background: transparent; color: #DDE0EE;')
+          : side ? 'gap: 12px; width: 100%; min-height: 44px; font-size: 14px; border-radius: 10px; ' + (icons ? 'justify-content: center; padding: 0;' : 'justify-content: flex-start; padding: 0 14px;') + (on ? 'background: #FFFFFF; color: #245A8A;' : 'background: transparent; color: #DDE8EE;')
           // Top bar: tabs with an orange underline on the current page.
-          : 'justify-content: center; gap: 8px; height: 48px; font-size: 14px; border-radius: 0; ' + (icons ? 'width: 52px; padding: 0;' : 'padding: 0 16px;') + (on ? 'background: rgba(255,255,255,0.10); color: #FFFFFF; box-shadow: inset 0 -3px 0 #F89624;' : 'background: transparent; color: #C9CCE3;')) });
+          : 'justify-content: center; gap: 8px; height: 48px; font-size: 14px; border-radius: 0; ' + (icons ? 'width: 52px; padding: 0;' : 'padding: 0 16px;') + (on ? 'background: rgba(255,255,255,0.10); color: #FFFFFF; box-shadow: inset 0 -3px 0 #E2BD6B;' : 'background: transparent; color: #C9D8E3;')) });
     });
     var moreOn = extra.indexOf(tab) >= 0, moreOpen = !!s.navMore && extra.length > 0;
     var railW = icons ? NAV_RAIL.icons : NAV_RAIL.open;
-    var menuStyle = compact ? 'display: flex; position: absolute; z-index: 30; align-items: center; left: 8px; right: 80px; bottom: 8px; gap: 2px; padding: 6px; border-radius: 18px; background: #24285D; border: 1px solid #15183A; box-sizing: border-box; box-shadow: 0 2px 4px rgba(21,24,58,0.20), 0 12px 32px rgba(21,24,58,0.30);'
+    var menuStyle = compact ? 'display: flex; position: absolute; z-index: 30; align-items: center; left: 8px; right: 80px; bottom: 8px; gap: 2px; padding: 6px; border-radius: 18px; background: #245A8A; border: 1px solid #15293A; box-sizing: border-box; box-shadow: 0 2px 4px rgba(21,41,58,0.20), 0 12px 32px rgba(21,41,58,0.30);'
       // Docked to the right edge from the header down; it stays under the header (z-index 20) so the search dropdown opens over it.
-      : side ? 'display: flex; position: absolute; z-index: 15; right: 0; top: 64px; bottom: 0; width: ' + railW + 'px; flex-direction: column; align-items: stretch; gap: 4px; padding: 16px 12px; box-sizing: border-box; background: #24285D; border-left: 1px solid #15183A;'
+      : side ? 'display: flex; position: absolute; z-index: 15; right: 0; top: 64px; bottom: 0; width: ' + railW + 'px; flex-direction: column; align-items: stretch; gap: 4px; padding: 16px 12px; box-sizing: border-box; background: #245A8A; border-left: 1px solid #15293A;'
       // Docked under the header, full width, in the page flow (order 1, between the header and the page).
-      : 'display: flex; position: relative; z-index: 15; order: 1; flex-shrink: 0; align-items: stretch; gap: 2px; padding: 0 40px; margin-bottom: 16px; overflow-x: auto; background: #24285D; box-shadow: 0 2px 6px rgba(21,24,58,0.18);';
-    var colBtn = FONT + 'display: flex; align-items: center; gap: 10px; flex-shrink: 0; border: none; background: transparent; color: #C9CCE3; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; box-sizing: border-box; ';
+      : 'display: flex; position: relative; z-index: 15; order: 1; flex-shrink: 0; align-items: stretch; gap: 2px; padding: 0 40px; margin-bottom: 16px; overflow-x: auto; background: #245A8A; box-shadow: 0 2px 6px rgba(21,41,58,0.18);';
+    var colBtn = FONT + 'display: flex; align-items: center; gap: 10px; flex-shrink: 0; border: none; background: transparent; color: #C9D8E3; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; box-sizing: border-box; ';
 
     // Settings dialog: menu items in order. Home stays first; at least NAV_MIN_SHOWN items stay visible.
     var shownCount = nav.order.filter(function (id) { return !nav.hidden[id]; }).length;
@@ -1337,7 +1337,7 @@ class Component extends DCLogic {
       o.splice(Math.max(1, Math.min(to, o.length)), 0, id);
       self.setNav({ order: o });
     };
-    var ARROW = 'width: 36px; height: 36px; flex-shrink: 0; border: 1px solid #DADCE8; border-radius: 8px; background: #FFFFFF; color: #24285D; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0;';
+    var ARROW = 'width: 36px; height: 36px; flex-shrink: 0; border: 1px solid #DAE2E8; border-radius: 8px; background: #FFFFFF; color: #245A8A; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0;';
     var navItems = nav.order.map(function (id, i) {
       var m = defs[id], locked = id === 'home', hidden = !!nav.hidden[id], last = i === nav.order.length - 1;
       var canHide = locked ? false : hidden || shownCount > NAV_MIN_SHOWN;
@@ -1362,8 +1362,8 @@ class Component extends DCLogic {
         dragEnd: function () { self._navDrag = null; },
         dragOver: function (e) { if (self._navDrag && e && e.preventDefault) e.preventDefault(); },
         drop: function (e) { if (e && e.preventDefault) e.preventDefault(); var from = self._navDrag; self._navDrag = null; if (from && from !== id) move(from, Math.max(1, self.state.nav.order.indexOf(id))); },
-        rowStyle: FONT + 'display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 6px 8px 6px 10px; box-sizing: border-box; border: 1px solid #DADCE8; border-radius: 10px; background: ' + (hidden ? '#F4F5F9' : '#FFFFFF') + '; color: ' + (hidden ? '#474945' : '#24285D') + '; ' + (locked ? '' : 'cursor: grab;'),
-        switchStyle: 'flex-shrink: 0; width: 44px; height: 26px; border-radius: 999px; border: none; padding: 3px; display: flex; box-sizing: border-box; justify-content: ' + (hidden ? 'flex-start' : 'flex-end') + '; background: ' + (hidden ? '#8286A8' : '#24285D') + '; ' + (canHide ? 'cursor: pointer;' : 'cursor: not-allowed; opacity: 0.45;') };
+        rowStyle: FONT + 'display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 6px 8px 6px 10px; box-sizing: border-box; border: 1px solid #DAE2E8; border-radius: 10px; background: ' + (hidden ? '#F4F7F9' : '#FFFFFF') + '; color: ' + (hidden ? '#474945' : '#245A8A') + '; ' + (locked ? '' : 'cursor: grab;'),
+        switchStyle: 'flex-shrink: 0; width: 44px; height: 26px; border-radius: 999px; border: none; padding: 3px; display: flex; box-sizing: border-box; justify-content: ' + (hidden ? 'flex-start' : 'flex-end') + '; background: ' + (hidden ? '#74899B' : '#245A8A') + '; ' + (canHide ? 'cursor: pointer;' : 'cursor: not-allowed; opacity: 0.45;') };
     });
     var choice = function (on) { return (on ? PILL_ON : PILL_OFF) + ' display: inline-flex; align-items: center; gap: 8px; min-height: 40px;'; };
     return {
@@ -1375,19 +1375,19 @@ class Component extends DCLogic {
       navCollapseStyle: colBtn + (side ? 'margin-top: auto; min-height: 40px; border-radius: 10px; ' + (icons ? 'justify-content: center; padding: 0;' : 'padding: 0 14px;') : 'margin-left: auto; height: 48px; padding: 0 12px;'),
       // Chevron points the way the menu will move: a rail collapses toward the right edge, the top bar toward the left.
       navChevron: 'display: block; flex-shrink: 0; transform: rotate(' + (side ? (icons ? 180 : 0) : (icons ? 0 : 180)) + 'deg);',
-      fadeStyle: compact ? 'position: absolute; z-index: 29; left: 0; right: 0; bottom: 0; pointer-events: none; height: ' + (compact ? '96px' : '130px') + '; background: linear-gradient(to bottom, rgba(238,240,246,0), rgba(238,240,246,0.92) 55%, #EEF0F6);' : 'display: none;',
+      fadeStyle: compact ? 'position: absolute; z-index: 29; left: 0; right: 0; bottom: 0; pointer-events: none; height: ' + (compact ? '96px' : '130px') + '; background: linear-gradient(to bottom, rgba(238,244,246,0), rgba(238,244,246,0.92) 55%, #EEF4F6);' : 'display: none;',
       navHasMore: extra.length > 0, navMoreOpen: moreOpen, navMoreExpanded: moreOpen ? 'true' : 'false', navMoreLabel: icons ? '' : 'More', navMoreShowLabel: !icons,
       navMoreCurrent: moreOn ? 'true' : 'false',
       navMoreToggle: function () { self.setState({ navMore: !s.navMore, aiPop: false, srOpen: false }); },
       navMoreClose: function () { self.setState({ navMore: false }); },
-      navMoreBtnStyle: FONT + 'display: flex; align-items: center; justify-content: center; gap: 2px; position: relative; flex-direction: column; flex: 1 1 0; min-height: ' + (icons ? '44px' : '52px') + '; padding: 4px 2px; font-size: 11px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; white-space: nowrap; ' + (moreOn || moreOpen ? 'background: #FFFFFF; color: #24285D;' : 'background: transparent; color: #EEF0F8;'),
+      navMoreBtnStyle: FONT + 'display: flex; align-items: center; justify-content: center; gap: 2px; position: relative; flex-direction: column; flex: 1 1 0; min-height: ' + (icons ? '44px' : '52px') + '; padding: 4px 2px; font-size: 11px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; white-space: nowrap; ' + (moreOn || moreOpen ? 'background: #FFFFFF; color: #245A8A;' : 'background: transparent; color: #EEF5F8;'),
       navMoreItems: extra.map(function (id) {
         var m = defs[id], on = tab === id;
         return Object.assign(kinds(id), { label: m.label, current: on ? 'page' : 'false', go: go(id), hasBadge: id === 'actions' && remaining > 0,
-          style: FONT + 'display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 0 12px; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; text-align: left; cursor: pointer; ' + (on ? 'background: #24285D; color: #FFFFFF;' : 'background: transparent; color: #24285D;') });
+          style: FONT + 'display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 0 12px; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; text-align: left; cursor: pointer; ' + (on ? 'background: #245A8A; color: #FFFFFF;' : 'background: transparent; color: #245A8A;') });
       }),
-      navMoreStyle: 'position: absolute; z-index: 32; right: 80px; bottom: 84px; width: 220px; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 14px; padding: 6px; display: flex; flex-direction: column; gap: 2px; box-shadow: 0 12px 32px rgba(36,40,93,0.22);',
-      navBadgeInline: 'margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; background: #F89624; color: #24285D; font-size: 11px; line-height: 20px; font-weight: 700; text-align: center;',
+      navMoreStyle: 'position: absolute; z-index: 32; right: 80px; bottom: 84px; width: 220px; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DAE2E8; border-radius: 14px; padding: 6px; display: flex; flex-direction: column; gap: 2px; box-shadow: 0 12px 32px rgba(36,90,138,0.22);',
+      navBadgeInline: 'margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; background: #C69C46; color: #173A5C; font-size: 11px; line-height: 20px; font-weight: 700; text-align: center;',
       // Settings dialog values.
       navPositions: [{ id: 'top', label: 'Top bar' }, { id: 'right', label: 'Right side' }].map(function (o) {
         var on = nav.pos === o.id;
@@ -1424,8 +1424,8 @@ class Component extends DCLogic {
         kind: t.kind, title: t.title, why: t.why, action: t.action,
         open: !st, isDone: !!st, doneLabel: st === 'snoozed' ? 'Snoozed until tomorrow' : 'Done · synced to CRM',
         dash: (10 + (i * 11) % 30) + ' 60',
-        kindStyle: 'font-size: 12px; line-height: 16px; font-weight: 600; padding: 2px 8px; border-radius: 999px; ' + (t.risk ? 'color: #B3261E; border: 1px solid #B3261E;' : 'color: #24285D; background: #F4F5F9; border: 1px solid #DADCE8;'),
-        wrapStyle: 'border-radius: 10px; ' + (exp ? 'background: #F4F5F9;' : 'background: transparent;') + (st ? ' opacity: 0.65;' : ''),
+        kindStyle: 'font-size: 12px; line-height: 16px; font-weight: 600; padding: 2px 8px; border-radius: 999px; ' + (t.risk ? 'color: #B3261E; border: 1px solid #B3261E;' : 'color: #245A8A; background: #F4F7F9; border: 1px solid #DAE2E8;'),
+        wrapStyle: 'border-radius: 10px; ' + (exp ? 'background: #F4F7F9;' : 'background: transparent;') + (st ? ' opacity: 0.65;' : ''),
         chevStyle: 'flex-shrink: 0; margin-top: 3px; transform: rotate(' + (exp ? '90' : '0') + 'deg);',
         expandedAttr: exp ? 'true' : 'false', showActions: exp,
         toggle: function () { self.setState({ expanded: s.expanded === i ? null : i }); },
@@ -1442,15 +1442,15 @@ class Component extends DCLogic {
     var views = d.views.map(function (vw) {
       var on = vw.id === activeId;
       return { label: vw.label, total: vw.total, pressed: on ? 'true' : 'false',
-        style: TABV + (on ? 'border: 1px solid #24285D; background: #FFFFFF; color: #24285D; box-shadow: inset 0 0 0 1px #24285D;' : 'border: 1px solid #DADCE8; background: #FFFFFF; color: #474945;'),
-        countStyle: 'min-width: 22px; height: 22px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; font-size: 12px; line-height: 22px; text-align: center; ' + (on ? 'background: #24285D; color: #FFFFFF;' : 'background: #F4F5F9; color: #474945;'),
+        style: TABV + (on ? 'border: 1px solid #245A8A; background: #FFFFFF; color: #245A8A; box-shadow: inset 0 0 0 1px #245A8A;' : 'border: 1px solid #DAE2E8; background: #FFFFFF; color: #474945;'),
+        countStyle: 'min-width: 22px; height: 22px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; font-size: 12px; line-height: 22px; text-align: center; ' + (on ? 'background: #245A8A; color: #FFFFFF;' : 'background: #F4F7F9; color: #474945;'),
         pick: function () { self.setState(self.viewState(vw.id, false)); } };
     });
     var chipsRaw = s.chips || v.chips.map(function (c) { return { label: c, ai: false }; });
     var chips = chipsRaw.map(function (c, i) {
       return {
         label: c.label, ai: c.ai,
-        style: 'min-height: 32px; display: flex; align-items: center; gap: 6px; padding: 0 12px; border-radius: 999px; font-size: 13px; font-weight: 600; box-sizing: border-box; color: #24285D; ' + (c.ai ? 'background: #F4F5F9; border: 1px solid #F89624;' : 'background: #FFFFFF; border: 1px solid #8286A8;'),
+        style: 'min-height: 32px; display: flex; align-items: center; gap: 6px; padding: 0 12px; border-radius: 999px; font-size: 13px; font-weight: 600; box-sizing: border-box; color: #245A8A; ' + (c.ai ? 'background: #F4F7F9; border: 1px solid #C69C46;' : 'background: #FFFFFF; border: 1px solid #74899B;'),
         remove: function () { var n = chipsRaw.slice(); n.splice(i, 1); self.setState({ chips: n }); }
       };
     });
@@ -1478,10 +1478,10 @@ class Component extends DCLogic {
     var cols = ser.map(function (c, i) {
       var dots = [];
       var on = i === hi;
-      for (var k = 0; k < c.p; k++) dots.push('display: block; width: ' + dot + 'px; height: ' + dot + 'px; border-radius: 999px; background: #B9BDD8;');
-      for (var j = 0; j < c.a; j++) dots.push('display: block; width: ' + dot + 'px; height: ' + dot + 'px; border-radius: 999px; background: ' + (on ? '#F89624' : '#24285D') + ';');
+      for (var k = 0; k < c.p; k++) dots.push('display: block; width: ' + dot + 'px; height: ' + dot + 'px; border-radius: 999px; background: #B9CBD8;');
+      for (var j = 0; j < c.a; j++) dots.push('display: block; width: ' + dot + 'px; height: ' + dot + 'px; border-radius: 999px; background: ' + (on ? '#C69C46' : '#245A8A') + ';');
       return { dots: dots, hover: function () { if (self.state.hover !== i) self.setState({ hover: i }); },
-        style: 'flex: 1 1 0; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: ' + gapPx + 'px; height: 100%; cursor: default; border-radius: 6px; ' + (on ? 'background: #F4F5F9;' : '') };
+        style: 'flex: 1 1 0; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: ' + gapPx + 'px; height: 100%; cursor: default; border-radius: 6px; ' + (on ? 'background: #F4F7F9;' : '') };
     });
     var hc = ser[hi];
     var readout = dayLabel(hi) + ': ' + hc.a + ' ' + x.chartUnit.toLowerCase() + ' actual' + (hc.p ? ', ' + (hc.a + hc.p) + ' projected by Genie' : '');
@@ -1491,7 +1491,7 @@ class Component extends DCLogic {
     var nv = this.navVals(compact, remaining);
     var titles = { home: 'Home', explore: 'Explore', actions: 'Action items', reports: 'Reports', crm: d.crmTitle, search: 'Search' };
     var cardR = '16px';
-    var cardStyle = 'background: #FFFFFF; border: 1px solid #DADCE8; border-radius: ' + cardR + '; display: flex; flex-direction: column; min-width: 0; box-sizing: border-box; ' + (compact ? 'padding: 16px; gap: 12px;' : 'padding: 20px 24px; gap: 14px;');
+    var cardStyle = 'background: #FFFFFF; border: 1px solid #DAE2E8; border-radius: ' + cardR + '; display: flex; flex-direction: column; min-width: 0; box-sizing: border-box; ' + (compact ? 'padding: 16px; gap: 12px;' : 'padding: 20px 24px; gap: 14px;');
     var aiLast = s.thread.length ? s.thread[s.thread.length - 1] : { q: '', did: [], a: '' };
 
     var filterGroups = FILTER_GROUPS.map(function (g) {
@@ -1504,8 +1504,8 @@ class Component extends DCLogic {
 
     return Object.assign(this.reportVals(compact), this.pipeVals(compact), this.homeVals(compact), this.searchVals(compact), nv, {
       d: dd, compact: compact, wide: !compact,
-      rootStyle: VARS + FONT + 'position: relative; overflow: hidden; display: flex; flex-direction: column; background: #EEF0F6; color: #24285D; ' + 'width: 100%; height: 100%;',
-      headerStyle: 'position: relative; z-index: ' + (compact && s.srOpen && tab !== 'search' ? '60' : '20') + '; flex-shrink: 0; display: flex; align-items: center; box-sizing: border-box; ' + (compact ? 'gap: 10px; min-height: 56px; padding: 8px 16px;' : 'gap: 16px; min-height: 64px; padding: 12px 40px; margin-bottom: ' + (nv.navPos === 'top' ? '0;' : '16px;')) + ' background: #FFFFFF; border-bottom: 1px solid #DADCE8; box-shadow: 0 1px 3px rgba(36,40,93,0.06);',
+      rootStyle: VARS + FONT + 'position: relative; overflow: hidden; display: flex; flex-direction: column; background: #EEF4F6; color: #245A8A; ' + 'width: 100%; height: 100%;',
+      headerStyle: 'position: relative; z-index: ' + (compact && s.srOpen && tab !== 'search' ? '60' : '20') + '; flex-shrink: 0; display: flex; align-items: center; box-sizing: border-box; ' + (compact ? 'gap: 10px; min-height: 56px; padding: 8px 16px;' : 'gap: 16px; min-height: 64px; padding: 12px 40px; margin-bottom: ' + (nv.navPos === 'top' ? '0;' : '16px;')) + ' background: #FFFFFF; border-bottom: 1px solid #DAE2E8; box-shadow: 0 1px 3px rgba(36,90,138,0.06);',
       hdrSpacer: 'flex-grow: 1;',
       logoStyle: 'display: block; flex-shrink: 0; ' + (compact ? 'order: -2; width: 26px; height: 34px;' : 'width: 28px; height: 36px;'),
       pageTitle: titles[tab],
@@ -1521,10 +1521,10 @@ class Component extends DCLogic {
       hwBox: 'display: flow-root; min-width: 0; ' + (compact ? '' : 'margin-bottom: 20px;'),
       narrowCol: 'display: flex; flex-direction: column; gap: 20px; ' + (compact ? '' : 'max-width: 880px; margin: 0 auto;'),
       kpiRow: 'display: grid; gap: ' + (compact ? '10px; grid-template-columns: repeat(1, minmax(0, 1fr));' : '20px; grid-template-columns: repeat(3, minmax(0, 1fr));'),
-      kpiCard: 'background: #FFFFFF; border: 1px solid #DADCE8; border-radius: ' + cardR + '; padding: ' + (compact ? '14px 16px' : '18px 20px') + '; display: flex; flex-direction: column; gap: 4px;',
+      kpiCard: 'background: #FFFFFF; border: 1px solid #DAE2E8; border-radius: ' + cardR + '; padding: ' + (compact ? '14px 16px' : '18px 20px') + '; display: flex; flex-direction: column; gap: 4px;',
       kpis: x.kpis.map(function (k) { return Object.assign({}, k, { deltaStyle: 'font-size: 13px; line-height: 18px; font-weight: 600; color: ' + (k.up ? '#1D7A55' : '#B3261E') + ';' }); }),
       cardStyle: cardStyle,
-      aiCardStyle: 'background: #F4F5F9; border: 1px solid #DADCE8; border-radius: ' + cardR + '; display: flex; flex-direction: column; gap: 14px; box-sizing: border-box; ' + (compact ? 'padding: 16px;' : 'padding: 20px;'),
+      aiCardStyle: 'background: #F4F7F9; border: 1px solid #DAE2E8; border-radius: ' + cardR + '; display: flex; flex-direction: column; gap: 14px; box-sizing: border-box; ' + (compact ? 'padding: 16px;' : 'padding: 20px;'),
       chartWrap: 'display: flex; gap: 24px; ' + (compact ? 'flex-direction: column-reverse;' : 'align-items: stretch;'),
       chartSide: 'display: flex; flex-direction: column; gap: 14px; justify-content: space-between; ' + (compact ? '' : 'width: 220px; flex-shrink: 0;'),
       plotStyle: 'display: flex; align-items: flex-end; gap: ' + (compact ? '1px' : '4px') + '; height: ' + (x.max * (dot + gapPx)) + 'px;',
@@ -1533,7 +1533,7 @@ class Component extends DCLogic {
       isHome: tab === 'home', isExplore: tab === 'explore', isActions: tab === 'actions', isCrm: tab === 'crm',
       goExplore: function () { self.setState({ tab: 'explore' }); },
       tray: tray, doneCount: doneCount, total: total, remaining: remaining, allDone: remaining === 0,
-      progressStyle: 'height: 100%; background: #24285D; border-radius: 999px; width: ' + Math.round(doneCount / total * 100) + '%;',
+      progressStyle: 'height: 100%; background: #245A8A; border-radius: 999px; width: ' + Math.round(doneCount / total * 100) + '%;',
       views: views, chips: chips,
       hasBanner: !!s.banner && !empty, bannerText: s.banner || '',
       undo: function () {
@@ -1543,29 +1543,29 @@ class Component extends DCLogic {
       isEmpty: empty, emptyHint: v.road ? v.road.empty : '',
       redo: function () { self.setState(self.viewState(v.id, true)); },
       hasResults: !empty, results: results,
-      rowStyle: 'border-bottom: 1px solid #DADCE8; ' + (compact ? 'display: flex; flex-direction: column; gap: 6px; padding: 12px 0;' : 'display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.6fr) minmax(0, 1.6fr) 190px; gap: 16px; align-items: center; padding: 12px 0;'),
+      rowStyle: 'border-bottom: 1px solid #DAE2E8; ' + (compact ? 'display: flex; flex-direction: column; gap: 6px; padding: 12px 0;' : 'display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.6fr) minmax(0, 1.6fr) 190px; gap: 16px; align-items: center; padding: 12px 0;'),
       actionCell: 'display: flex; ' + (compact ? 'padding-top: 4px;' : 'justify-content: flex-end;'),
       countLine: 'Showing ' + results.length + ' of ' + v.total + ' ' + v.noun + ' · ' + d.territory,
       stagesGrid: 'display: grid; gap: 12px; ' + (compact ? 'grid-template-columns: repeat(2, minmax(0, 1fr));' : 'grid-template-columns: repeat(4, minmax(0, 1fr));'),
       log: s.log.concat(d.log),
       remaining: remaining,
       aiExpanded: s.aiPop ? 'true' : 'false',
-      aiBtnStyle: 'position: absolute; z-index: 31; display: flex; align-items: center; justify-content: center; padding: 0; border: 2px solid #FFFFFF; border-radius: 999px; cursor: pointer; background: #F89624; color: #24285D; box-shadow: 0 2px 4px rgba(21,24,58,0.20), 0 12px 28px rgba(21,24,58,0.28); ' + (compact ? 'right: 8px; bottom: 8px; width: 64px; height: 64px;' : 'right: ' + (nv.navRailW + 32) + 'px; bottom: 22px; width: 64px; height: 64px;') + (s.aiPop ? ' outline: 3px solid #24285D; outline-offset: 2px;' : ''),
+      aiBtnStyle: 'position: absolute; z-index: 31; display: flex; align-items: center; justify-content: center; padding: 0; border: 2px solid #FFFFFF; border-radius: 999px; cursor: pointer; background: #C69C46; color: #173A5C; box-shadow: 0 2px 4px rgba(21,41,58,0.20), 0 12px 28px rgba(21,41,58,0.28); ' + (compact ? 'right: 8px; bottom: 8px; width: 64px; height: 64px;' : 'right: ' + (nv.navRailW + 32) + 'px; bottom: 22px; width: 64px; height: 64px;') + (s.aiPop ? ' outline: 3px solid #245A8A; outline-offset: 2px;' : ''),
       lampSize: '32',
       toggleAi: function () { self.setState({ aiPop: !s.aiPop, srOpen: false }); },
       closeAi: function () { self.setState({ aiPop: false, aiFull: false }); },
       aiPopOpen: s.aiPop,
       aiPopStyle: s.aiFull
-        ? 'position: absolute; z-index: 50; top: 0; left: 0; right: 0; bottom: 0; overflow-y: auto; box-sizing: border-box; background: #F4F5F9; display: flex; justify-content: center; ' + (compact ? 'padding: 0;' : 'padding: 24px 40px;')
+        ? 'position: absolute; z-index: 50; top: 0; left: 0; right: 0; bottom: 0; overflow-y: auto; box-sizing: border-box; background: #F4F7F9; display: flex; justify-content: center; ' + (compact ? 'padding: 0;' : 'padding: 24px 40px;')
         // Pop-up modal, centered over a dimmed page; the expand button makes it full screen.
-        : 'position: absolute; z-index: 45; overflow-y: auto; border-radius: 16px; box-shadow: 0 24px 64px rgba(21,24,58,0.35); ' + (compact ? 'left: 12px; right: 12px; top: 48px; max-height: calc(100% - 96px);' : 'left: 50%; top: 50%; transform: translate(-50%, -50%); width: 820px; max-width: calc(100% - 80px); max-height: calc(100% - 96px);'),
+        : 'position: absolute; z-index: 45; overflow-y: auto; border-radius: 16px; box-shadow: 0 24px 64px rgba(21,41,58,0.35); ' + (compact ? 'left: 12px; right: 12px; top: 48px; max-height: calc(100% - 96px);' : 'left: 50%; top: 50%; transform: translate(-50%, -50%); width: 820px; max-width: calc(100% - 80px); max-height: calc(100% - 96px);'),
       aiSectionStyle: s.aiFull
         ? 'width: 100%; max-width: 880px; min-height: 100%; display: flex; flex-direction: column; gap: 16px; box-sizing: border-box; background: transparent; ' + (compact ? 'padding: 16px;' : 'padding: 8px 0;')
-        : 'background: #F4F5F9; border: 1px solid #DADCE8; border-radius: ' + cardR + '; display: flex; flex-direction: column; gap: 14px; box-sizing: border-box; ' + (compact ? 'padding: 16px;' : 'padding: 20px;'),
+        : 'background: #F4F7F9; border: 1px solid #DAE2E8; border-radius: ' + cardR + '; display: flex; flex-direction: column; gap: 14px; box-sizing: border-box; ' + (compact ? 'padding: 16px;' : 'padding: 20px;'),
       aiFull: !!s.aiFull, aiNotFull: !s.aiFull, aiFullLabel: s.aiFull ? 'Exit full screen' : 'Expand Genie to full screen',
       aiFullToggle: function () { self.setState({ aiFull: !s.aiFull }); },
       aiNotifText: !compact,
-      aiInputStyle: 'display: flex; align-items: center; gap: 8px; height: 50px; padding: 0 6px 0 16px; border: 1px solid #8286A8; border-radius: 999px; background: #FFFFFF; box-sizing: border-box; flex-shrink: 0; ' + (s.aiFull ? 'position: sticky; bottom: ' + (compact ? '12px' : '0') + '; margin-top: auto; box-shadow: 0 6px 24px rgba(36,40,93,0.16);' : ''),
+      aiInputStyle: 'display: flex; align-items: center; gap: 8px; height: 50px; padding: 0 6px 0 16px; border: 1px solid #74899B; border-radius: 999px; background: #FFFFFF; box-sizing: border-box; flex-shrink: 0; ' + (s.aiFull ? 'position: sticky; bottom: ' + (compact ? '12px' : '0') + '; margin-top: auto; box-shadow: 0 6px 24px rgba(36,90,138,0.16);' : ''),
       aiDraft: s.aiDraft || '',
       aiOnDraft: function (e) { self.setState({ aiDraft: e && e.target ? e.target.value : '' }); },
       aiOnKey: function (e) { if (e && e.key === 'Enter') { if (e.preventDefault) e.preventDefault(); self.genieAsk(self.state.aiDraft); } },
@@ -1582,21 +1582,21 @@ class Component extends DCLogic {
       nudgeOff: function () { self.setState({ nudgeOff: true, nudgeTip: false }); },
       nudgeTip: !!s.nudgeTip, nudgeTipOn: function () { if (!self.state.nudgeTip) self.setState({ nudgeTip: true }); }, nudgeTipOff: function () { if (self.state.nudgeTip) self.setState({ nudgeTip: false }); },
       nudgeOnAttr: s.nudgeOff ? 'false' : 'true', nudgeToggle: function () { self.setState({ nudgeOff: !s.nudgeOff, nudgeHidden: {} }); },
-      nudgeTrack: 'width: 36px; height: 20px; border-radius: 999px; flex-shrink: 0; position: relative; display: inline-block; ' + (s.nudgeOff ? 'background: #DADCE8;' : 'background: #24285D;'),
-      nudgeKnob: 'position: absolute; top: 2px; width: 16px; height: 16px; border-radius: 999px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(21,24,58,0.3); ' + (s.nudgeOff ? 'left: 2px;' : 'left: 18px;'),
-      nudgeStyle: 'position: absolute; z-index: 31; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DADCE8; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 12px 32px rgba(36,40,93,0.22); ' + (compact ? 'left: 12px; right: 12px; bottom: 88px;' : 'right: ' + (nv.navRailW + 32) + 'px; bottom: 100px; width: 320px;'),
-      nudgeTail: 'position: absolute; bottom: -7px; right: 26px; width: 12px; height: 12px; background: #FFFFFF; border-right: 1px solid #DADCE8; border-bottom: 1px solid #DADCE8; transform: rotate(45deg);',
+      nudgeTrack: 'width: 36px; height: 20px; border-radius: 999px; flex-shrink: 0; position: relative; display: inline-block; ' + (s.nudgeOff ? 'background: #DAE2E8;' : 'background: #245A8A;'),
+      nudgeKnob: 'position: absolute; top: 2px; width: 16px; height: 16px; border-radius: 999px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(21,41,58,0.3); ' + (s.nudgeOff ? 'left: 2px;' : 'left: 18px;'),
+      nudgeStyle: 'position: absolute; z-index: 31; box-sizing: border-box; background: #FFFFFF; border: 1px solid #DAE2E8; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 12px 32px rgba(36,90,138,0.22); ' + (compact ? 'left: 12px; right: 12px; bottom: 88px;' : 'right: ' + (nv.navRailW + 32) + 'px; bottom: 100px; width: 320px;'),
+      nudgeTail: 'position: absolute; bottom: -7px; right: 26px; width: 12px; height: 12px; background: #FFFFFF; border-right: 1px solid #DAE2E8; border-bottom: 1px solid #DAE2E8; transform: rotate(45deg);',
       aiCanBrief: tab === 'reports', aiBriefing: !!s.aiBrief && tab === 'reports',
       aiBriefSub: 'Genie summarizes what stands out and checks the numbers.',
       aiBriefOn: function () { self.setState({ aiBrief: true }); }, aiBriefOff: function () { self.setState({ aiBrief: false }); },
       briefHowOpenAttr: s.briefHow ? 'true' : 'false', briefHowIcon: 'transform: rotate(' + (s.briefHow ? '90' : '0') + 'deg);',
       aiNoun: s.persona === 'lo' ? 'market' : s.persona === 'ae' ? 'accounts' : s.persona === 'rec' ? 'candidates' : 'team',
       aiTiles: x.tiles.map(function (label, i) { return { label: label, run: function () { self.run(i); },
-        iconStyle: 'width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; ' + (i === 3 ? 'background: #F89624; color: #24285D;' : 'background: #24285D; color: #FFFFFF;') }; }),
+        iconStyle: 'width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; ' + (i === 3 ? 'background: #C69C46; color: #173A5C;' : 'background: #245A8A; color: #FFFFFF;') }; }),
       clearThread: function () { self.setState({ thread: [] }); },
       showResults: function () { self.setState({ tab: 'explore', aiPop: false }); },
       modalOpen: !!s.modal, modalFilters: s.modal === 'filters', modalPersona: s.modal === 'persona', modalSettings: s.modal === 'settings',
-      dialogStyle: 'position: absolute; z-index: 40; background: #FFFFFF; overflow-y: auto; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 8px 24px rgba(36, 40, 93, 0.18); ' + (compact ? 'left: 0; right: 0; bottom: 0; max-height: 760px; border-radius: 16px 16px 0 0; padding: 16px 16px 24px;' : 'top: 80px; left: 50%; width: 560px; margin-left: -280px; max-height: 740px; border-radius: 16px; padding: 24px;'),
+      dialogStyle: 'position: absolute; z-index: 40; background: #FFFFFF; overflow-y: auto; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 8px 24px rgba(36,90,138, 0.18); ' + (compact ? 'left: 0; right: 0; bottom: 0; max-height: 760px; border-radius: 16px 16px 0 0; padding: 16px 16px 24px;' : 'top: 80px; left: 50%; width: 560px; margin-left: -280px; max-height: 740px; border-radius: 16px; padding: 24px;'),
       openFilters: function () { self.setState({ modal: 'filters' }); },
       openPersona: function () { self.setState({ modal: 'persona' }); },
       openSettings: function () { self.setState({ modal: 'settings', navMore: false, srOpen: false, aiPop: false }); },
@@ -1611,12 +1611,12 @@ class Component extends DCLogic {
       personaList: ORDER.map(function (k) {
         var p = PERSONAS[k], on = k === s.persona;
         return { initials: p.initials, role: p.role, name: p.name, territory: p.territory, pressed: on ? 'true' : 'false',
-          style: FONT + 'display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border-radius: 10px; cursor: pointer; background: ' + (on ? '#F4F5F9' : '#FFFFFF') + '; border: ' + (on ? '2px solid #24285D' : '1px solid #DADCE8') + '; color: #24285D;',
+          style: FONT + 'display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border-radius: 10px; cursor: pointer; background: ' + (on ? '#F4F7F9' : '#FFFFFF') + '; border: ' + (on ? '2px solid #245A8A' : '1px solid #DAE2E8') + '; color: #245A8A;',
           pick: function () { self.setState(self.fresh(k, s.allowCompare)); } };
       }),
       allowCompare: s.allowCompare ? 'true' : 'false',
       toggleCompare: function () { self.setState({ allowCompare: !s.allowCompare }); },
-      switchTrack: 'flex-shrink: 0; width: 52px; height: 32px; border-radius: 999px; border: none; padding: 3px; display: flex; cursor: pointer; justify-content: ' + (s.allowCompare ? 'flex-end' : 'flex-start') + '; background: ' + (s.allowCompare ? '#24285D' : '#8286A8') + ';'
+      switchTrack: 'flex-shrink: 0; width: 52px; height: 32px; border-radius: 999px; border: none; padding: 3px; display: flex; cursor: pointer; justify-content: ' + (s.allowCompare ? 'flex-end' : 'flex-start') + '; background: ' + (s.allowCompare ? '#245A8A' : '#74899B') + ';'
     });
   }
 }
